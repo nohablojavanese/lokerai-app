@@ -1,47 +1,30 @@
-// src/components/CVPreview.tsx
-import React from 'react';
+import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
+import ATSTemplate from './Preview/ATSTemplate'
+import StylizedTemplate from './Preview/StylizedTemplate';
 
 const CVPreview: React.FC = () => {
   const cv = useSelector((state: RootState) => state.cv);
+  const [template, setTemplate] = useState<'ats' | 'stylized'>('ats');
 
   return (
-    <div className="bg-white p-6 rounded shadow-lg">
-      <h2 className="text-2xl font-bold mb-4">CV Preview</h2>
-      <div className="mb-6">
-        <h3 className="text-xl font-semibold mb-2">Personal Information</h3>
-        <p><strong>Name:</strong> {cv.personalInfo.name}</p>
-        <p><strong>Email:</strong> {cv.personalInfo.email}</p>
-        <p><strong>Phone:</strong> {cv.personalInfo.phone}</p>
+    <div>
+      <div className="mb-4">
+        <button
+          className={`mr-2 px-4 py-2 rounded ${template === 'ats' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+          onClick={() => setTemplate('ats')}
+        >
+          ATS Template
+        </button>
+        <button
+          className={`px-4 py-2 rounded ${template === 'stylized' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+          onClick={() => setTemplate('stylized')}
+        >
+          Stylized Template
+        </button>
       </div>
-      <div className="mb-6">
-        <h3 className="text-xl font-semibold mb-2">Education</h3>
-        {cv.education.map((edu, index) => (
-          <div key={index} className="mb-2">
-            <p><strong>{edu.school}</strong> - {edu.degree}</p>
-            <p>Graduated: {edu.graduationYear}</p>
-          </div>
-        ))}
-      </div>
-      <div className="mb-6">
-        <h3 className="text-xl font-semibold mb-2">Experience</h3>
-        {cv.experience.map((exp, index) => (
-          <div key={index} className="mb-2">
-            <p><strong>{exp.company}</strong> - {exp.position}</p>
-            <p>{exp.startDate} - {exp.endDate}</p>
-            <p>{exp.description}</p>
-          </div>
-        ))}
-      </div>
-      <div>
-        <h3 className="text-xl font-semibold mb-2">Skills</h3>
-        <ul className="list-disc list-inside">
-          {cv.skills.map((skill, index) => (
-            <li key={index}>{skill}</li>
-          ))}
-        </ul>
-      </div>
+      {template === 'ats' ? <ATSTemplate cv={cv} /> : <StylizedTemplate cv={cv} />}
     </div>
   );
 };
