@@ -13,10 +13,10 @@ export default function Home() {
           <div className="flex items-center bg-gray-900 p-2 lg:p-3"></div>
         </div>
 
-        <div className="bg-white fixed start-0 w-1/2 bottom-0 ps-7 pe-5 overflow-y-auto">
+        <div className="bg-white start-0 w-1/2 mt-10 ps-7 pe-5 overflow-y-auto">
           <CVEditor />
         </div>
-        <div className="fixed end-0 w-1/2 bottom-0 p-5 overflow-y-auto bg-background top-10">
+        <div className="fixed end-0 w-1/2 bottom-0 p-5 overflow-y-auto bg-background top-10 bg-gray-50">
           <CVPreview />
         </div>
       </main>

@@ -174,21 +174,15 @@ const CVPreview: React.FC = () => {
   const SelectedTemplate = templates[selectedTemplate];
 
   return (
-    <div className=" relative w-full bg-blue">
+    <div className=" relative w-full h-full bg-blue">
       <div
         id="cv-preview"
-        className="mb-4 p-8 bg-white shadow-lg w-full"
+        className="mb-4 p-8 bg-white shadow-lg h-full w-full"
       >
         <Suspense fallback={<div>Loading template...</div>}>
           <SelectedTemplate cv={cv} />
         </Suspense>
       </div>
-
-      {/* <div
-        className={`${
-          showSidebar ? "ml-0" : "ml-0"
-        }`}
-      > */}
 
       <div className="absolute bottom-2 right-2">
         <div className="flex space-x-2 justify-center mt-4 buttom-0">
