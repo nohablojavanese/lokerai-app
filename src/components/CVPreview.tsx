@@ -1,17 +1,16 @@
-import React, { useState, lazy, Suspense } from 'react';
-import { useSelector } from 'react-redux';
-import { RootState } from '../redux/store';
-import { jsPDF } from 'jspdf';
-import html2canvas from 'html2canvas';
-import CVSidebar from './Preview/Sidebar/Sidebar';
-import { CVState } from '@/types';
+import React, { useState, lazy, Suspense } from "react";
+import { useSelector } from "react-redux";
+import { RootState } from "../redux/store";
+import { jsPDF } from "jspdf";
+import html2canvas from "html2canvas";
+import CVSidebar from "./Preview/Sidebar/Sidebar";
+import { CVState } from "@/types";
 
 // Lazy load template components
-const ATSTemplate = lazy(() => import('./Preview/ATSTemplate'));
-const StylizedTemplate = lazy(() => import('./Preview/StylizedTemplate'));
-const ModernTemplate = lazy(() => import('./Preview/Modern'));
-const Template4 = lazy(() => import('./Preview/NewModel'));
-
+const ATSTemplate = lazy(() => import("./Preview/ATSTemplate"));
+const StylizedTemplate = lazy(() => import("./Preview/StylizedTemplate"));
+const ModernTemplate = lazy(() => import("./Preview/Modern"));
+const Template4 = lazy(() => import("./Preview/NewModel"));
 
 const templates: Record<string, React.ComponentType<{ cv: CVState }>> = {
   ats: ATSTemplate,
@@ -21,57 +20,87 @@ const templates: Record<string, React.ComponentType<{ cv: CVState }>> = {
 };
 
 interface PdfOptions {
-  format: 'a4' | 'letter';
-  orientation: 'portrait' | 'landscape';
+  format: "a4" | "letter";
+  orientation: "portrait" | "landscape";
 }
 
 const CVPreview: React.FC = () => {
   const cv = useSelector((state: RootState) => state.cv);
-  const [selectedTemplate, setSelectedTemplate] = useState<string>('ats');
+  const [selectedTemplate, setSelectedTemplate] = useState<string>("ats");
   const [pdfOptions, setPdfOptions] = useState<PdfOptions>({
-    format: 'a4',
-    orientation: 'portrait',
+    format: "a4",
+    orientation: "portrait",
   });
   const [showSidebar, setShowSidebar] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [pdfDataUrl, setPdfDataUrl] = useState<string | null>(null);
 
-  const handleTemplateChange = (template: string) => setSelectedTemplate(template);
+  const handleTemplateChange = (template: string) =>
+    setSelectedTemplate(template);
 
   const handlePdfOptionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setPdfOptions((prev) => ({ ...prev, [name]: value as 'a4' | 'letter' | 'portrait' | 'landscape' }));
+    setPdfOptions((prev) => ({
+      ...prev,
+      [name]: value as "a4" | "letter" | "portrait" | "landscape",
+    }));
   };
 
   const generatePDF = async (): Promise<jsPDF | null> => {
-    const element = document.getElementById('cv-preview');
+    const element = document.getElementById("cv-preview");
     if (!element) return null;
 
     const canvas = await html2canvas(element, { scale: 2 });
-    const imgData = canvas.toDataURL('image/jpeg', 1.0);
     const pdf = new jsPDF({
       orientation: pdfOptions.orientation,
       format: pdfOptions.format,
-      unit: 'px',
+      unit: "pt",
     });
 
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
+    const margin = 40; 
     const imgWidth = canvas.width;
     const imgHeight = canvas.height;
 
-    const ratio = Math.min(pageWidth / imgWidth, pageHeight / imgHeight);
-    const imgX = (pageWidth - imgWidth * ratio) / 2;
-    const imgY = 30;
+    const ratio = (pageWidth - 2 * margin) / imgWidth;
+    const scaledImgHeight = imgHeight * ratio;
+    let heightLeft = scaledImgHeight;
+    let position = 0;
+    let page = 1;
 
-    pdf.addImage(imgData, 'JPEG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+    pdf.addImage(
+      canvas,
+      "JPEG",
+      margin,
+      margin,
+      pageWidth - 2 * margin,
+      scaledImgHeight
+    );
+    heightLeft -= pageHeight - 2 * margin;
+
+    while (heightLeft >= 0) {
+      position = heightLeft - scaledImgHeight;
+      pdf.addPage();
+      pdf.addImage(
+        canvas,
+        "JPEG",
+        margin,
+        position + margin,
+        pageWidth - 2 * margin,
+        scaledImgHeight
+      );
+      heightLeft -= pageHeight - 2 * margin;
+      page++;
+    }
+
     return pdf;
   };
 
   const handlePreviewPDF = async () => {
     const pdf = await generatePDF();
     if (pdf) {
-      const dataUrl = pdf.output('dataurlstring');
+      const dataUrl = pdf.output("dataurlstring");
       setPdfDataUrl(dataUrl);
       setShowPreview(true);
     }
@@ -80,7 +109,7 @@ const CVPreview: React.FC = () => {
   const handleDownloadPDF = async () => {
     const pdf = await generatePDF();
     if (pdf) {
-      pdf.save('cv.pdf');
+      pdf.save("cv.pdf");
     }
   };
 
@@ -92,10 +121,14 @@ const CVPreview: React.FC = () => {
         className="absolute top-4 right-4 z-10 bg-blue-500 text-white px-4 py-2 rounded"
         onClick={() => setShowSidebar(!showSidebar)}
       >
-        {showSidebar ? 'Hide Options' : 'Show Options'}
+        {showSidebar ? "Hide Options" : "Show Options"}
       </button>
-      
-      <div className={`flex transition-all duration-300 ease-in-out ${showSidebar ? 'ml-0' : 'ml-0'}`}>
+
+      <div
+        className={`flex transition-all duration-300 ease-in-out ${
+          showSidebar ? "ml-0" : "ml-0"
+        }`}
+      >
         <div className="flex-grow">
           <div id="cv-preview" className="mb-4 p-8 bg-white shadow-lg">
             <Suspense fallback={<div>Loading template...</div>}>
@@ -119,9 +152,9 @@ const CVPreview: React.FC = () => {
         </div>
       </div>
 
-      <div 
+      <div
         className={`fixed left-0 top-0 h-full w-64 bg-gray-100 p-4 overflow-y-auto transition-transform duration-300 ease-in-out drop-shadow-xl	 ${
-          showSidebar ? 'translate-x-0' : '-translate-x-full'
+          showSidebar ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         <CVSidebar
