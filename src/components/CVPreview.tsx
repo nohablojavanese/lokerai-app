@@ -39,7 +39,7 @@ const CVPreview: React.FC = () => {
     marginBottom: 40,
     marginLeft: 40,
     marginRight: 40,
-    addPageNumbers: true,
+    addPageNumbers: false,
   });
   const [showSidebar, setShowSidebar] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
@@ -174,17 +174,17 @@ const CVPreview: React.FC = () => {
   const SelectedTemplate = templates[selectedTemplate];
 
   return (
-    <div className=" relative w-full h-full bg-blue">
+    <div className="relative h-full overflow-y-auto">
       <div
         id="cv-preview"
-        className="mb-4 p-8 bg-white shadow-lg h-full w-full"
+        className="relative p-4 bg-white w-a4 h-a4 shadow-xl mx-auto"
       >
         <Suspense fallback={<div>Loading template...</div>}>
           <SelectedTemplate cv={cv} />
         </Suspense>
       </div>
 
-      <div className="absolute bottom-2 right-2">
+      <div className="fixed bottom-2 right-2">
         <div className="flex space-x-2 justify-center mt-4 buttom-0">
           <button
             className={`px-4 py-2 bg-gray-600 hover:bg-blue-600 text-white rounded ${
@@ -240,7 +240,12 @@ const CVPreview: React.FC = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-4 rounded-lg w-full h-full max-w-5xl max-h-[90vh] flex flex-col">
             <h2 className="text-2xl mb-4">PDF Preview</h2>
-            <iframe src={pdfDataUrl} className="flex-grow w-full" />
+            <iframe
+              src={pdfDataUrl}
+              className="flex-grow w-full"
+              allow="fullscreen" // Allow fullscreen mode, disables download button in most browsers
+              // sandbox=""
+            />
             <button
               className="mt-4 px-4 py-2 bg-red-500 text-white rounded self-end"
               onClick={() => setShowPreview(false)}

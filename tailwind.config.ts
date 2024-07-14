@@ -18,6 +18,12 @@ const config = {
       },
     },
     extend: {
+      width: {
+        'a4': '794px',
+      },
+      height: {
+        'a4': '1122px',
+      },
       fontFamily: {
         poppins: ["Poppins", "sans-serif"],
       },

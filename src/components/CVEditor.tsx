@@ -7,7 +7,7 @@ import { ModeToggle } from "./Provider/Theme/DarkMode";
 
 const CVEditor: React.FC = () => {
   return (
-    <div className="space-y-8 text-black dark:text-white">
+    <div className="space-y-8 text-black dark:text-white max-w-full mx-auto ">
       <div>
         <ModeToggle />
         <h2 className="text-2xl font-bold mb-4 text-black dark:text-white">

@@ -132,8 +132,9 @@ const EducationForm: React.FC = () => {
           </form>
 
           <AccordionContent className="mt-6">
-            <h3 className="text-xl font-semibold mb-4">Added Education</h3>
+            {/* <h3 className="text-xl font-semibold mb-4">Added Education</h3> */}
             {education.map((edu, index) => (
+              
               <div key={index} className="mb-4 p-4 border rounded">
                 <p>
                   <strong>School:</strong> {edu.school}
