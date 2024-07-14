@@ -16,11 +16,10 @@ const CVEditor: React.FC = () => {
         <PersonalInfoForm />
       </div>
       <div>
-        <h2 className="text-2xl font-bold mb-4">Education</h2>
         <EducationForm />
       </div>
       <div>
-        <h2 className="text-2xl font-bold mb-4">Experience</h2>
+        {/* <h2 className="text-2xl font-bold mb-4">Experience</h2> */}
         <ExperienceForm />
       </div>
       <div>

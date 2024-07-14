@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { ThemeProvider } from "@/components/Provider/Theme/theme-provider";
-import { Inter } from "next/font/google";
+import { Inter, Poppins } from "next/font/google";
 import "./globals.css";
-import { ModeToggle } from "@/components/Provider/Theme/DarkMode";
 
 const inter = Inter({ subsets: ["latin"] });
+const poppins = Poppins({ weight: ["300"], subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -18,7 +18,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={poppins.className}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -26,7 +26,6 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           {children}
-          <ModeToggle />
         </ThemeProvider>
       </body>
     </html>

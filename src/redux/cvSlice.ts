@@ -23,9 +23,9 @@ export interface CVState {
 
 const initialState: CVState = {
   personalInfo: {
-    name: '',
-    email: '',
-    phone: '',
+    name: 'Nama Kamu',
+    email: 'email@example.com',
+    phone: "0821xxxxxxxx",
   },
   education: [],
   experience: [],
