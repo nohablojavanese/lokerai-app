@@ -15,34 +15,27 @@ const personalInfoSchema = yup.object().shape({
 const PersonalInfoForm: React.FC = () => {
   const dispatch = useDispatch();
   const personalInfo = useSelector((state: RootState) => state.cv.personalInfo);
-  const cv = useSelector((state: RootState) => state.cv);
 
   const {
-    register: registerPersonalInfo,
-    handleSubmit: handleSubmitPersonalInfo,
-    formState: { errors: errorsPersonalInfo },
-  } = useForm({
-    resolver: yupResolver(personalInfoSchema),
-    defaultValues: cv.personalInfo,
-  });
-  const onSubmitPersonalInfo = (data: any) => {
-    dispatch(updatePersonalInfo(data));
-  };
-  const {
     register,
-    handleSubmit,
     formState: { errors },
+    watch,
   } = useForm({
     resolver: yupResolver(personalInfoSchema),
     defaultValues: personalInfo,
   });
 
-  const onSubmit = (data: any) => {
-    dispatch(updatePersonalInfo(data));
-  };
+  React.useEffect(() => {
+    const subscription = watch((value, { name, type }) => {
+      if (name) {
+        dispatch(updatePersonalInfo({ [name]: value[name] }));
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [watch, dispatch]);
 
   return (
-    <form noValidate onSubmit={handleSubmitPersonalInfo(onSubmitPersonalInfo)}>
+    <form noValidate>
       <div className="mb-4">
         <label htmlFor="name" className="block mb-2">
           Name
@@ -50,13 +43,11 @@ const PersonalInfoForm: React.FC = () => {
         <input
           type="text"
           id="name"
-          {...registerPersonalInfo("name")}
+          {...register("name")}
           className="w-full p-2 border rounded"
         />
-        {errorsPersonalInfo.name && (
-          <span className="text-red-500 border-red-200">
-            {errorsPersonalInfo.name.message}
-          </span>
+        {errors.name && (
+          <span className="text-red-500">{errors.name.message}</span>
         )}
       </div>
       <div className="mb-4">
@@ -66,13 +57,11 @@ const PersonalInfoForm: React.FC = () => {
         <input
           type="email"
           id="email"
-          {...registerPersonalInfo("email")}
+          {...register("email")}
           className="w-full p-2 border rounded"
         />
-        {errorsPersonalInfo.email && (
-          <span className="text-red-500">
-            {errorsPersonalInfo.email.message}
-          </span>
+        {errors.email && (
+          <span className="text-red-500">{errors.email.message}</span>
         )}
       </div>
       <div className="mb-4">
@@ -82,21 +71,13 @@ const PersonalInfoForm: React.FC = () => {
         <input
           type="tel"
           id="phone"
-          {...registerPersonalInfo("phone")}
+          {...register("phone")}
           className="w-full p-2 border rounded"
         />
-        {errorsPersonalInfo.phone && (
-          <span className="text-red-500">
-            {errorsPersonalInfo.phone.message}
-          </span>
+        {errors.phone && (
+          <span className="text-red-500">{errors.phone.message}</span>
         )}
       </div>
-      <button
-        type="submit"
-        className="bg-blue-500 text-white px-4 py-2 rounded"
-      >
-        Save Personal Info
-      </button>{" "}
     </form>
   );
 };

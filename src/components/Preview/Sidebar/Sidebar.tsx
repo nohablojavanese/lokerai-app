@@ -6,9 +6,14 @@ interface CVOptionsSidebarProps {
   pdfOptions: {
     format: 'a4' | 'letter';
     orientation: 'portrait' | 'landscape';
+    marginTop: number;
+    marginBottom: number;
+    marginLeft: number;
+    marginRight: number;
+    addPageNumbers: boolean;
   };
   onTemplateChange: (template: string) => void;
-  onPdfOptionChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  onPdfOptionChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
 }
 
 const CVSidebar: React.FC<CVOptionsSidebarProps> = ({
@@ -49,7 +54,7 @@ const CVSidebar: React.FC<CVOptionsSidebarProps> = ({
             <option value="letter">Letter</option>
           </select>
         </label>
-        <label className="block">
+        <label className="block mb-2">
           Orientation:
           <select
             name="orientation"
@@ -60,6 +65,56 @@ const CVSidebar: React.FC<CVOptionsSidebarProps> = ({
             <option value="portrait">Portrait</option>
             <option value="landscape">Landscape</option>
           </select>
+        </label>
+        <label className="block mb-2">
+          Top Margin (pt):
+          <input
+            type="number"
+            name="marginTop"
+            value={pdfOptions.marginTop}
+            onChange={onPdfOptionChange}
+            className="w-full p-2 border rounded mt-1"
+          />
+        </label>
+        <label className="block mb-2">
+          Bottom Margin (pt):
+          <input
+            type="number"
+            name="marginBottom"
+            value={pdfOptions.marginBottom}
+            onChange={onPdfOptionChange}
+            className="w-full p-2 border rounded mt-1"
+          />
+        </label>
+        <label className="block mb-2">
+          Left Margin (pt):
+          <input
+            type="number"
+            name="marginLeft"
+            value={pdfOptions.marginLeft}
+            onChange={onPdfOptionChange}
+            className="w-full p-2 border rounded mt-1"
+          />
+        </label>
+        <label className="block mb-2">
+          Right Margin (pt):
+          <input
+            type="number"
+            name="marginRight"
+            value={pdfOptions.marginRight}
+            onChange={onPdfOptionChange}
+            className="w-full p-2 border rounded mt-1"
+          />
+        </label>
+        <label className="block">
+          Add Page Numbers:
+          <input
+            type="checkbox"
+            name="addPageNumbers"
+            checked={pdfOptions.addPageNumbers}
+            onChange={onPdfOptionChange}
+            className="ml-2"
+          />
         </label>
       </div>
     </div>

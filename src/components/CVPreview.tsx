@@ -1,10 +1,11 @@
-import React, { useState, lazy, Suspense } from "react";
+import React, { useState, lazy, Suspense, useCallback } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/store";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 import CVSidebar from "./Preview/Sidebar/Sidebar";
 import { CVState } from "@/types";
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 // Lazy load template components
 const ATSTemplate = lazy(() => import("./Preview/ATSTemplate"));
@@ -22,6 +23,11 @@ const templates: Record<string, React.ComponentType<{ cv: CVState }>> = {
 interface PdfOptions {
   format: "a4" | "letter";
   orientation: "portrait" | "landscape";
+  marginTop: number;
+  marginBottom: number;
+  marginLeft: number;
+  marginRight: number;
+  addPageNumbers: boolean;
 }
 
 const CVPreview: React.FC = () => {
@@ -30,72 +36,119 @@ const CVPreview: React.FC = () => {
   const [pdfOptions, setPdfOptions] = useState<PdfOptions>({
     format: "a4",
     orientation: "portrait",
+    marginTop: 40,
+    marginBottom: 40,
+    marginLeft: 40,
+    marginRight: 40,
+    addPageNumbers: true,
   });
   const [showSidebar, setShowSidebar] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [pdfDataUrl, setPdfDataUrl] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleTemplateChange = (template: string) =>
     setSelectedTemplate(template);
 
-  const handlePdfOptionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const { name, value } = e.target;
+  const handlePdfOptionChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value, type } = e.target;
     setPdfOptions((prev) => ({
       ...prev,
-      [name]: value as "a4" | "letter" | "portrait" | "landscape",
+      [name]:
+        type === "checkbox"
+          ? (e.target as HTMLInputElement).checked
+          : type === "number"
+          ? Number(value)
+          : value,
     }));
   };
 
-  const generatePDF = async (): Promise<jsPDF | null> => {
+  const generatePDF = useCallback(async (): Promise<jsPDF | null> => {
+    setIsGenerating(true);
+    setError(null);
     const element = document.getElementById("cv-preview");
-    if (!element) return null;
+    if (!element) {
+      setError("CV preview element not found");
+      setIsGenerating(false);
+      return null;
+    }
 
-    const canvas = await html2canvas(element, { scale: 2 });
-    const pdf = new jsPDF({
-      orientation: pdfOptions.orientation,
-      format: pdfOptions.format,
-      unit: "pt",
-    });
+    try {
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        logging: false,
+        useCORS: true,
+      });
+      const pdf = new jsPDF({
+        orientation: pdfOptions.orientation,
+        format: pdfOptions.format,
+        unit: "pt",
+      });
 
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    const margin = 40; 
-    const imgWidth = canvas.width;
-    const imgHeight = canvas.height;
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const contentWidth = pageWidth - pdfOptions.marginLeft - pdfOptions.marginRight;
+      const contentHeight = pageHeight - pdfOptions.marginTop - pdfOptions.marginBottom;
 
-    const ratio = (pageWidth - 2 * margin) / imgWidth;
-    const scaledImgHeight = imgHeight * ratio;
-    let heightLeft = scaledImgHeight;
-    let position = 0;
-    let page = 1;
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
 
-    pdf.addImage(
-      canvas,
-      "JPEG",
-      margin,
-      margin,
-      pageWidth - 2 * margin,
-      scaledImgHeight
-    );
-    heightLeft -= pageHeight - 2 * margin;
+      const ratio = contentWidth / imgWidth;
+      const scaledImgHeight = imgHeight * ratio;
+      let heightLeft = scaledImgHeight;
+      let position = 0;
+      let pageCount = 1;
 
-    while (heightLeft >= 0) {
-      position = heightLeft - scaledImgHeight;
-      pdf.addPage();
       pdf.addImage(
         canvas,
         "JPEG",
-        margin,
-        position + margin,
-        pageWidth - 2 * margin,
+        pdfOptions.marginLeft,
+        pdfOptions.marginTop,
+        contentWidth,
         scaledImgHeight
       );
-      heightLeft -= pageHeight - 2 * margin;
-      page++;
-    }
 
-    return pdf;
-  };
+      if (pdfOptions.addPageNumbers) {
+        pdf.setFontSize(10);
+        pdf.text(`Page ${pageCount}`, pageWidth / 2, pageHeight - 10, { align: "center" });
+      }
+
+      heightLeft -= contentHeight;
+
+      while (heightLeft >= 0) {
+        position = heightLeft - scaledImgHeight;
+        pdf.addPage();
+        pageCount++;
+
+        pdf.addImage(
+          canvas,
+          "JPEG",
+          pdfOptions.marginLeft,
+          position + pdfOptions.marginTop,
+          contentWidth,
+          scaledImgHeight
+        );
+
+        if (pdfOptions.addPageNumbers) {
+          pdf.setFontSize(10);
+          pdf.text(`Page ${pageCount}`, pageWidth / 2, pageHeight - 10, { align: "center" });
+        }
+
+        heightLeft -= contentHeight;
+      }
+
+      setIsGenerating(false);
+      return pdf;
+    } catch (err) {
+      console.error("Error generating PDF:", err);
+      setError("Failed to generate PDF. Please try again.");
+      setIsGenerating(false);
+      return null;
+    }
+  }, [pdfOptions]);
 
   const handlePreviewPDF = async () => {
     const pdf = await generatePDF();
@@ -124,36 +177,47 @@ const CVPreview: React.FC = () => {
         {showSidebar ? "Hide Options" : "Show Options"}
       </button>
 
-      <div
-        className={`flex transition-all duration-300 ease-in-out ${
-          showSidebar ? "ml-0" : "ml-0"
-        }`}
-      >
+      <div className={`flex transition-all duration-300 ease-in-out ${
+        showSidebar ? "ml-0" : "ml-0"
+      }`}>
         <div className="flex-grow">
-          <div id="cv-preview" className="mb-4 p-8 bg-white shadow-lg">
+          <div id="cv-preview" className="mb-4 p-8 bg-white shadow-lg relative w-full">
             <Suspense fallback={<div>Loading template...</div>}>
               <SelectedTemplate cv={cv} />
             </Suspense>
           </div>
           <div className="flex space-x-2 justify-center mt-4">
             <button
-              className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded"
+              className={`px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded ${
+                isGenerating ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
               onClick={handlePreviewPDF}
+              disabled={isGenerating}
             >
-              Preview PDF
+              {isGenerating ? 'Generating...' : 'Preview PDF'}
             </button>
             <button
-              className="px-4 py-2 bg-blue-500 text-white rounded"
+              className={`px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded ${
+                isGenerating ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
               onClick={handleDownloadPDF}
+              disabled={isGenerating}
             >
-              Download PDF
+              {isGenerating ? 'Generating...' : 'Download PDF'}
             </button>
           </div>
+          {error && (
+            <Alert variant="destructive" className="mt-4">
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+          
         </div>
       </div>
 
       <div
-        className={`fixed left-0 top-0 h-full w-64 bg-gray-100 p-4 overflow-y-auto transition-transform duration-300 ease-in-out drop-shadow-xl	 ${
+        className={`fixed left-0 top-0 h-full w-64 bg-gray-100 p-4 overflow-y-auto transition-transform duration-300 ease-in-out drop-shadow-xl ${
           showSidebar ? "translate-x-0" : "-translate-x-full"
         }`}
       >

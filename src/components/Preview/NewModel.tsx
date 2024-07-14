@@ -6,7 +6,7 @@ const Template4: React.FC = () => {
   const cv = useSelector((state: { cv: CVState }) => state.cv);
 
   return (
-    <div className="bg-white text-gray-800 p-8 max-w-4xl mx-auto font-sans">
+    <div className="bg-white text-gray-800 font-sans">
       {/* Header */}
       <header className="mb-8">
         <h1 className="text-4xl font-bold text-teal-600 mb-2">{cv.personalInfo.name}</h1>
