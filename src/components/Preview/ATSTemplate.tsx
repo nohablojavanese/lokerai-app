@@ -7,7 +7,7 @@ interface ATSTemplateProps {
 
 const ATSTemplate: React.FC<ATSTemplateProps> = ({ cv }) => {
   return (
-    <div className="bg-white text-gray-800 font-sans">
+    <div className="font-sans">
       <h1 className="text-3xl font-bold mb-4">{cv.personalInfo.name}</h1>
       <p className="mb-2">{cv.personalInfo.email} | {cv.personalInfo.phone}</p>
       
