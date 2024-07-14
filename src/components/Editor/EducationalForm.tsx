@@ -1,11 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useDispatch, useSelector } from "react-redux";
-import { addEducation, removeEducation, CVState } from "../../redux/cvSlice";
+import { addEducation, removeEducation, updateEducation, CVState } from "../../redux/cvSlice";
 import { RootState } from "../../redux/store";
-// import { AccordionContent } from "../ui/accordion";
 import {
   Accordion,
   AccordionContent,
@@ -22,23 +21,43 @@ const educationSchema = yup.object().shape({
 const EducationForm: React.FC = () => {
   const dispatch = useDispatch();
   const education = useSelector((state: RootState) => state.cv.education);
+  const [editIndex, setEditIndex] = useState<number | null>(null);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
+    setValue,
   } = useForm({
     resolver: yupResolver(educationSchema),
   });
 
   const onSubmit = (data: CVState["education"][0]) => {
-    dispatch(addEducation(data));
+    if (editIndex !== null) {
+      dispatch(updateEducation({ index: editIndex, education: data }));
+      setEditIndex(null);
+    } else {
+      dispatch(addEducation(data));
+    }
     reset();
   };
 
   const handleRemove = (index: number) => {
     dispatch(removeEducation(index));
+  };
+
+  const handleEdit = (index: number) => {
+    const educationItem = education[index];
+    setValue("school", educationItem.school);
+    setValue("degree", educationItem.degree);
+    setValue("graduationYear", educationItem.graduationYear);
+    setEditIndex(index);
+  };
+
+  const cancelEdit = () => {
+    setEditIndex(null);
+    reset();
   };
 
   return (
@@ -50,10 +69,7 @@ const EducationForm: React.FC = () => {
           </AccordionTrigger>
           <form onSubmit={handleSubmit(onSubmit)} className="mb-6">
             <AccordionContent className="mb-4">
-              <label
-                htmlFor="school"
-                className="block mb-2 text-black dark:text-white"
-              >
+              <label htmlFor="school" className="block mb-2 text-black dark:text-white">
                 School
               </label>
               <input
@@ -99,10 +115,19 @@ const EducationForm: React.FC = () => {
             <AccordionContent>
               <button
                 type="submit"
-                className="bg-blue-500 text-white px-4 py-2 rounded"
+                className="bg-blue-500 text-white px-4 py-2 rounded mr-2"
               >
-                Add Education
+                {editIndex !== null ? "Update Education" : "Add Education"}
               </button>
+              {editIndex !== null && (
+                <button
+                  type="button"
+                  onClick={cancelEdit}
+                  className="bg-gray-500 text-white px-4 py-2 rounded"
+                >
+                  Cancel Edit
+                </button>
+              )}
             </AccordionContent>
           </form>
 
@@ -119,6 +144,12 @@ const EducationForm: React.FC = () => {
                 <p>
                   <strong>Graduation Year:</strong> {edu.graduationYear}
                 </p>
+                <button
+                  onClick={() => handleEdit(index)}
+                  className="mt-2 bg-blue-500 text-white px-4 py-2 rounded mr-2"
+                >
+                  Edit
+                </button>
                 <button
                   onClick={() => handleRemove(index)}
                   className="mt-2 bg-red-500 text-white px-4 py-2 rounded"

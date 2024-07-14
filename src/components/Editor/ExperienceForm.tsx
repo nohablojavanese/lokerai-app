@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -22,12 +22,14 @@ const experienceSchema = yup.object().shape({
 const ExperienceForm: React.FC = () => {
   const dispatch = useDispatch();
   const experience = useSelector((state: RootState) => state.cv.experience);
+  const [editIndex, setEditIndex] = useState<number | null>(null);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
+    setValue,
   } = useForm({
     resolver: yupResolver(experienceSchema),
   });
@@ -39,6 +41,21 @@ const ExperienceForm: React.FC = () => {
 
   const handleRemove = (index: number) => {
     dispatch(removeExperience(index));
+  };
+  const handleEdit = (index: number) => {
+    const experienceItem = experience[index];
+    setValue("company", experienceItem.company);
+    setValue("position", experienceItem.position);
+    setValue("startDate", experienceItem.startDate);
+    setValue("endDate", experienceItem.endDate);
+    setValue("description", experienceItem.description);
+
+    setEditIndex(index);
+  };
+
+  const cancelEdit = () => {
+    setEditIndex(null);
+    reset();
   };
 
   return (
@@ -82,7 +99,7 @@ const ExperienceForm: React.FC = () => {
                 Start Date
               </label>
               <input
-                type="text"
+                type="date"
                 id="startDate"
                 {...register("startDate")}
                 className="w-full p-2 border rounded"
@@ -106,27 +123,21 @@ const ExperienceForm: React.FC = () => {
               )}
             </AccordionContent>
             <AccordionContent className="mb-4">
-              <label htmlFor="description" className="block mb-2">
-                Description
-              </label>
-              <textarea
-                id="description"
-                {...register("description")}
-                className="w-full p-2 border rounded"
-              />
-              {errors.description && (
-                <span className="text-red-500">
-                  {errors.description.message}
-                </span>
-              )}
-            </AccordionContent>
-            <AccordionContent>
               <button
                 type="submit"
-                className="bg-blue-500 text-white px-4 py-2 rounded"
+                className="bg-blue-500 text-white px-4 py-2 rounded mr-2"
               >
-                Add Experience
+                {editIndex !== null ? "Update Education" : "Add Experience"}
               </button>
+              {editIndex !== null && (
+                <button
+                  type="button"
+                  onClick={cancelEdit}
+                  className="bg-gray-500 text-white px-4 py-2 rounded"
+                >
+                  Cancel Edit
+                </button>
+              )}
             </AccordionContent>
           </form>
 
@@ -152,8 +163,14 @@ const ExperienceForm: React.FC = () => {
                 <strong>Description:</strong> {exp.description}
               </p>
               <button
+                onClick={() => handleEdit(index)}
+                className="mt-2 bg-blue-500 text-white px-4 py-2 rounded mr-2"
+              >
+                Edit
+              </button>
+              <button
                 onClick={() => handleRemove(index)}
-                className="mt-2 bg-red-500 text-white px-4 py-2 rounded"
+                className="mt-2 bg-gray-400 hover:bg-red-500 text-red-400 hover:text-white px-4 py-2 rounded"
               >
                 Remove
               </button>
