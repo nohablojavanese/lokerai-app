@@ -1,11 +1,13 @@
-import React from 'react';
-
+import React from "react";
+import ATSAnalyzer from "../ATS/Optimization";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
 interface CVOptionsSidebarProps {
   templates: string[];
   selectedTemplate: string;
   pdfOptions: {
-    format: 'a4' | 'letter';
-    orientation: 'portrait' | 'landscape';
+    format: "a4" | "letter";
+    orientation: "portrait" | "landscape";
     marginTop: number;
     marginBottom: number;
     marginLeft: number;
@@ -13,7 +15,9 @@ interface CVOptionsSidebarProps {
     addPageNumbers: boolean;
   };
   onTemplateChange: (template: string) => void;
-  onPdfOptionChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
+  onPdfOptionChange: (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => void;
 }
 
 const CVSidebar: React.FC<CVOptionsSidebarProps> = ({
@@ -23,16 +27,22 @@ const CVSidebar: React.FC<CVOptionsSidebarProps> = ({
   onTemplateChange,
   onPdfOptionChange,
 }) => {
+  const cv = useSelector((state: RootState) => state.cv);
+
   return (
     <div className="bg-gray-100 p-4 rounded-lg">
       <h2 className="text-xl font-bold mb-4">CV Options</h2>
+      <ATSAnalyzer cv={cv} />
+
       <div className="mb-4">
-        <h3 className="font-semibold mb-2">Template</h3>
+        <h3 className="font-semibold my-2">Template</h3>
         {templates.map((template) => (
           <button
             key={template}
             className={`block w-full text-left px-4 py-2 rounded mb-2 ${
-              selectedTemplate === template ? 'bg-blue-500 text-white' : 'bg-white'
+              selectedTemplate === template
+                ? "bg-blue-500 text-white"
+                : "bg-white"
             }`}
             onClick={() => onTemplateChange(template)}
           >

@@ -5,9 +5,8 @@ import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 import CVSidebar from "./Preview/Sidebar/Sidebar";
 import { CVState } from "@/types";
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
-// Lazy load template components
 const ATSTemplate = lazy(() => import("./Preview/ATSTemplate"));
 const StylizedTemplate = lazy(() => import("./Preview/StylizedTemplate"));
 const ModernTemplate = lazy(() => import("./Preview/Modern"));
@@ -90,8 +89,10 @@ const CVPreview: React.FC = () => {
 
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
-      const contentWidth = pageWidth - pdfOptions.marginLeft - pdfOptions.marginRight;
-      const contentHeight = pageHeight - pdfOptions.marginTop - pdfOptions.marginBottom;
+      const contentWidth =
+        pageWidth - pdfOptions.marginLeft - pdfOptions.marginRight;
+      const contentHeight =
+        pageHeight - pdfOptions.marginTop - pdfOptions.marginBottom;
 
       const imgWidth = canvas.width;
       const imgHeight = canvas.height;
@@ -113,7 +114,9 @@ const CVPreview: React.FC = () => {
 
       if (pdfOptions.addPageNumbers) {
         pdf.setFontSize(10);
-        pdf.text(`Page ${pageCount}`, pageWidth / 2, pageHeight - 10, { align: "center" });
+        pdf.text(`Page ${pageCount}`, pageWidth / 2, pageHeight - 10, {
+          align: "center",
+        });
       }
 
       heightLeft -= contentHeight;
@@ -134,7 +137,9 @@ const CVPreview: React.FC = () => {
 
         if (pdfOptions.addPageNumbers) {
           pdf.setFontSize(10);
-          pdf.text(`Page ${pageCount}`, pageWidth / 2, pageHeight - 10, { align: "center" });
+          pdf.text(`Page ${pageCount}`, pageWidth / 2, pageHeight - 10, {
+            align: "center",
+          });
         }
 
         heightLeft -= contentHeight;
@@ -162,62 +167,69 @@ const CVPreview: React.FC = () => {
   const handleDownloadPDF = async () => {
     const pdf = await generatePDF();
     if (pdf) {
-      pdf.save("cv.pdf");
+      pdf.save("LokerAI_CVMaker.pdf");
     }
   };
 
   const SelectedTemplate = templates[selectedTemplate];
 
   return (
-    <div className="relative h-full">
-      <button
-        className="absolute top-4 right-4 z-10 bg-blue-500 text-white px-4 py-2 rounded"
-        onClick={() => setShowSidebar(!showSidebar)}
+    <div className=" relative w-full bg-blue">
+      <div
+        id="cv-preview"
+        className="mb-4 p-8 bg-white shadow-lg w-full"
       >
-        {showSidebar ? "Hide Options" : "Show Options"}
-      </button>
-
-      <div className={`flex transition-all duration-300 ease-in-out ${
-        showSidebar ? "ml-0" : "ml-0"
-      }`}>
-        <div className="flex-grow">
-          <div id="cv-preview" className="mb-4 p-8 bg-white shadow-lg relative w-full">
-            <Suspense fallback={<div>Loading template...</div>}>
-              <SelectedTemplate cv={cv} />
-            </Suspense>
-          </div>
-          <div className="flex space-x-2 justify-center mt-4">
-            <button
-              className={`px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded ${
-                isGenerating ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
-              onClick={handlePreviewPDF}
-              disabled={isGenerating}
-            >
-              {isGenerating ? 'Generating...' : 'Preview PDF'}
-            </button>
-            <button
-              className={`px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded ${
-                isGenerating ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
-              onClick={handleDownloadPDF}
-              disabled={isGenerating}
-            >
-              {isGenerating ? 'Generating...' : 'Download PDF'}
-            </button>
-          </div>
-          {error && (
-            <Alert variant="destructive" className="mt-4">
-              <AlertTitle>Error</AlertTitle>
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-          
-        </div>
+        <Suspense fallback={<div>Loading template...</div>}>
+          <SelectedTemplate cv={cv} />
+        </Suspense>
       </div>
 
+      {/* <div
+        className={`${
+          showSidebar ? "ml-0" : "ml-0"
+        }`}
+      > */}
+
+      <div className="absolute bottom-2 right-2">
+        <div className="flex space-x-2 justify-center mt-4 buttom-0">
+          <button
+            className={`px-4 py-2 bg-gray-600 hover:bg-blue-600 text-white rounded ${
+              isGenerating ? "opacity-50 cursor-not-allowed" : ""
+            }`}
+            onClick={() => setShowSidebar(!showSidebar)}
+          >
+            {showSidebar ? "Hide Options" : "Show Options"}
+          </button>
+          <button
+            className={`px-4 py-2 bg-gray-600 hover:bg-gray-500 text-white rounded ${
+              isGenerating ? "opacity-50 cursor-not-allowed" : ""
+            }`}
+            onClick={handlePreviewPDF}
+            disabled={isGenerating}
+          >
+            {isGenerating ? "Generating..." : "Preview PDF"}
+          </button>
+          <button
+            className={`px-4 py-2 bg-gray-600 hover:bg-gray-500 text-white rounded ${
+              isGenerating ? "opacity-50 cursor-not-allowed" : ""
+            }`}
+            onClick={handleDownloadPDF}
+            disabled={isGenerating}
+          >
+            {isGenerating ? "Generating..." : "Download PDF"}
+          </button>
+        </div>
+        {error && (
+          <Alert variant="destructive" className="mt-4">
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+      </div>
+      {/* </div> */}
+
       <div
-        className={`fixed left-0 top-0 h-full w-64 bg-gray-100 p-4 overflow-y-auto transition-transform duration-300 ease-in-out drop-shadow-xl ${
+        className={`fixed left-0 top-0 h-full w-1/2 bg-gray-100 p-4 overflow-y-auto transition-transform duration-300 ease-in-out drop-shadow-xl ${
           showSidebar ? "translate-x-0" : "-translate-x-full"
         }`}
       >

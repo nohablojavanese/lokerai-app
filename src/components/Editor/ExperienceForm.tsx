@@ -122,6 +122,22 @@ const ExperienceForm: React.FC = () => {
                 <span className="text-red-500">{errors.endDate.message}</span>
               )}
             </AccordionContent>
+            <AccordionContent>
+              <label htmlFor="description" className="block mb-2">
+                Description
+              </label>
+              <textarea
+                id="description"
+                {...register("description")}
+                className="w-full p-2 border rounded"
+              />
+              {errors.description && (
+                <span className="text-red-500">
+                  {errors.description.message}
+                </span>
+              )}
+            </AccordionContent>
+            <AccordionContent></AccordionContent>
             <AccordionContent className="mb-4">
               <button
                 type="submit"
@@ -164,13 +180,13 @@ const ExperienceForm: React.FC = () => {
               </p>
               <button
                 onClick={() => handleEdit(index)}
-                className="mt-2 bg-blue-500 text-white px-4 py-2 rounded mr-2"
+                className="mt-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded mr-2"
               >
                 Edit
               </button>
               <button
                 onClick={() => handleRemove(index)}
-                className="mt-2 bg-gray-400 hover:bg-red-500 text-red-400 hover:text-white px-4 py-2 rounded"
+                className="mt-2 bg-gray-200 hover:bg-red-500 text-red-600 hover:text-white px-4 py-2 rounded"
               >
                 Remove
               </button>
