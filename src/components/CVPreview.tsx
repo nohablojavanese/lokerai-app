@@ -39,10 +39,10 @@ const CVPreview: React.FC = () => {
   const [pdfOptions, setPdfOptions] = useState<PdfOptions>({
     format: "a4",
     orientation: "portrait",
-    marginTop: 0,
-    marginBottom: 0,
-    marginLeft: 0,
-    marginRight: 0,
+    marginTop: 10,
+    marginBottom: 10,
+    marginLeft: 10,
+    marginRight: 10,
     addPageNumbers: false,
   });
   const [showSidebar, setShowSidebar] = useState(false);
@@ -135,10 +135,9 @@ const CVPreview: React.FC = () => {
     }
   };
 
-
   const handlePreviewPDF = async () => {
     const pdf = await generatePDF();
-    console.log("Generating PDF", pdf)
+    console.log("Generating PDF", pdf);
     if (pdf) {
       const dataUrl = pdf.output("dataurlstring");
       setPdfDataUrl(dataUrl);
@@ -162,14 +161,10 @@ const CVPreview: React.FC = () => {
     >
       <div
         id="cv-preview"
-        className="absolute inset-0 bg-white shadow-xl text-black overflow-hidden p-8" // Add padding here
+        className="absolute inset-0 bg-white shadow-xl text-black overflow-hidden" 
         style={{
-          width: `calc(100% - ${
-            pdfOptions.marginLeft + pdfOptions.marginRight
-          }mm)`,
-          height: `calc(100% - ${
-            pdfOptions.marginTop + pdfOptions.marginBottom
-          }mm)`,
+          width: `calc(100%)`,
+          height: `calc(100% )`,
           padding: `${pdfOptions.marginTop}mm ${pdfOptions.marginRight}mm ${pdfOptions.marginBottom}mm ${pdfOptions.marginLeft}mm`,
         }}
       >
