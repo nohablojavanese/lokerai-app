@@ -3,6 +3,8 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 export interface CVState {
   personalInfo: {
     name: string;
+    last:string;
+    alamat:string;
     email: string;
     phone: string;
   };
@@ -23,8 +25,10 @@ export interface CVState {
 
 const initialState: CVState = {
   personalInfo: {
-    name: 'Nama Kamu',
-    email: 'email@example.com',
+    name: 'Nama Depan',
+    last: 'Belakang ',
+    alamat: 'Jln. Jalan JK 9AK',
+    email: 'email@contoh.com',
     phone: "0821xxxxxxxx",
   },
   education: [],
