@@ -13,7 +13,7 @@ export default function Home() {
           <div className="flex items-center bg-gray-900 p-2 lg:p-3"></div>
         </div> */}
 
-        <div className="bg-blue-50/40 start-0 md:w-1/2 pt-10 ps-7 pe-5 overflow-y-auto min-fit  rounded-r-3xl border-2 m-4 border-blue-400">
+        <div className="bg-blue-50/20 start-0 md:w-1/2 pt-10 ps-7 pe-5 overflow-y-auto min-fit  rounded-r-3xl border-2 m-4 border-blue-400">
           <CVEditor />
         </div>
         <div className=" end-0 md:w-1/2 bottom-0 p-5 overflow-y-auto bg-background  bg-gray-50 min-w-fit  ">
