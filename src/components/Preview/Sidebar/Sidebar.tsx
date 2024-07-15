@@ -2,6 +2,7 @@ import React from "react";
 import ATSAnalyzer from "../ATS/Optimization";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
+import FontSettings from "../ATS/FontSetting";
 interface CVOptionsSidebarProps {
   templates: string[];
   selectedTemplate: string;
@@ -127,6 +128,7 @@ const CVSidebar: React.FC<CVOptionsSidebarProps> = ({
           />
         </label>
       </div>
+      <FontSettings />
     </div>
   );
 };

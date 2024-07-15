@@ -1,6 +1,11 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 export interface CVState {
+  fontSettings: {
+    headerFont: string;
+    bodyFont: string;
+    fontSize: number;
+  };
   personalInfo: {
     name: string;
     last:string;
@@ -24,6 +29,11 @@ export interface CVState {
 }
 
 const initialState: CVState = {
+  fontSettings: {
+    headerFont: 'Arial',
+    bodyFont: 'Helvetica',
+    fontSize: 12,
+  },
   personalInfo: {
     name: 'Nama Depan',
     last: 'Belakang ',
@@ -70,6 +80,9 @@ const cvSlice = createSlice({
     removeSkill: (state, action: PayloadAction<number>) => {
       state.skills.splice(action.payload, 1);
     },
+    updateFontSettings: (state, action: PayloadAction<Partial<CVState['fontSettings']>>) => {
+      state.fontSettings = { ...state.fontSettings, ...action.payload };
+    },
   },
 });
 
@@ -83,6 +96,7 @@ export const {
   removeExperience,
   addSkill,
   removeSkill,
+  updateFontSettings,
 } = cvSlice.actions;
 
 export default cvSlice.reducer;

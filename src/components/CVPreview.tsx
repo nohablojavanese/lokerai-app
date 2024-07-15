@@ -1,4 +1,4 @@
-import React, { useState, lazy, Suspense, useCallback } from "react";
+import React, { useState, lazy, Suspense } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/store";
 import { jsPDF } from "jspdf";
@@ -11,12 +11,19 @@ const ATSTemplate = lazy(() => import("./Preview/ATSTemplate"));
 const StylizedTemplate = lazy(() => import("./Preview/StylizedTemplate"));
 const ModernTemplate = lazy(() => import("./Preview/Modern"));
 const Template4 = lazy(() => import("./Preview/NewModel"));
+const ATS1 = lazy(() => import("./Preview/ClaudeATS1"));
+const ATS2 = lazy(() => import("./Preview/ClaudeATS2"));
+
+
 
 const templates: Record<string, React.ComponentType<{ cv: CVState }>> = {
   ats: ATSTemplate,
   stylized: StylizedTemplate,
   modern: ModernTemplate,
   template4: Template4,
+  ATS1: ATS1,
+  ATS2: ATS2,
+
 };
 
 interface PdfOptions {
@@ -35,10 +42,10 @@ const CVPreview: React.FC = () => {
   const [pdfOptions, setPdfOptions] = useState<PdfOptions>({
     format: "a4",
     orientation: "portrait",
-    marginTop: 40,
-    marginBottom: 40,
-    marginLeft: 40,
-    marginRight: 40,
+    marginTop: 20,
+    marginBottom: 20,
+    marginLeft: 20,
+    marginRight: 20,
     addPageNumbers: false,
   });
   const [showSidebar, setShowSidebar] = useState(false);
@@ -65,7 +72,7 @@ const CVPreview: React.FC = () => {
     }));
   };
 
-  const generatePDF = useCallback(async (): Promise<jsPDF | null> => {
+  const generatePDF = async (): Promise<jsPDF | null> => {
     setIsGenerating(true);
     setError(null);
     const element = document.getElementById("cv-preview");
@@ -76,73 +83,71 @@ const CVPreview: React.FC = () => {
     }
 
     try {
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        logging: false,
-        useCORS: true,
-      });
       const pdf = new jsPDF({
         orientation: pdfOptions.orientation,
-        format: pdfOptions.format,
         unit: "pt",
+        format: pdfOptions.format,
       });
 
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
-      const contentWidth =
-        pageWidth - pdfOptions.marginLeft - pdfOptions.marginRight;
-      const contentHeight =
-        pageHeight - pdfOptions.marginTop - pdfOptions.marginBottom;
+      const margin = {
+        top: pdfOptions.marginTop,
+        right: pdfOptions.marginRight,
+        bottom: pdfOptions.marginBottom,
+        left: pdfOptions.marginLeft,
+      };
 
-      const imgWidth = canvas.width;
-      const imgHeight = canvas.height;
+      const contentWidth = pageWidth - margin.left - margin.right;
+      const contentHeight = pageHeight - margin.top - margin.bottom;
 
-      const ratio = contentWidth / imgWidth;
-      const scaledImgHeight = imgHeight * ratio;
-      let heightLeft = scaledImgHeight;
+      const scale = 2;
+      const canvasWidth = contentWidth * scale;
+      const canvasHeight = element.scrollHeight * scale;
+
+      const canvas = await html2canvas(element, {
+        scale: scale,
+        width: contentWidth,
+        height: element.scrollHeight,
+        windowWidth: contentWidth,
+      });
+
+      const imgData = canvas.toDataURL("image/png");
+      
+      let heightLeft = canvasHeight;
       let position = 0;
       let pageCount = 1;
 
-      pdf.addImage(
-        canvas,
-        "JPEG",
-        pdfOptions.marginLeft,
-        pdfOptions.marginTop,
-        contentWidth,
-        scaledImgHeight
-      );
-
-      if (pdfOptions.addPageNumbers) {
-        pdf.setFontSize(10);
-        pdf.text(`Page ${pageCount}`, pageWidth / 2, pageHeight - 10, {
-          align: "center",
-        });
-      }
-
-      heightLeft -= contentHeight;
-
-      while (heightLeft >= 0) {
-        position = heightLeft - scaledImgHeight;
-        pdf.addPage();
-        pageCount++;
-
+      while (heightLeft > 0) {
         pdf.addImage(
-          canvas,
-          "JPEG",
-          pdfOptions.marginLeft,
-          position + pdfOptions.marginTop,
+          imgData,
+          "PNG",
+          margin.left,
+          margin.top - position,
           contentWidth,
-          scaledImgHeight
+          canvasHeight / scale,
+          "",
+          "FAST"
         );
+        
+        heightLeft -= contentHeight * scale;
+        position += contentHeight * scale;
 
-        if (pdfOptions.addPageNumbers) {
-          pdf.setFontSize(10);
-          pdf.text(`Page ${pageCount}`, pageWidth / 2, pageHeight - 10, {
-            align: "center",
-          });
+        if (heightLeft > 0) {
+          pdf.addPage();
+          pageCount++;
         }
 
-        heightLeft -= contentHeight;
+        if (pdfOptions.addPageNumbers) {
+          pdf.setPage(pageCount);
+          pdf.setFontSize(10);
+          pdf.text(
+            `Page ${pageCount}`,
+            pageWidth / 2,
+            pageHeight - margin.bottom / 2,
+            { align: "center" }
+          );
+        }
       }
 
       setIsGenerating(false);
@@ -153,7 +158,7 @@ const CVPreview: React.FC = () => {
       setIsGenerating(false);
       return null;
     }
-  }, [pdfOptions]);
+  };
 
   const handlePreviewPDF = async () => {
     const pdf = await generatePDF();
@@ -177,7 +182,12 @@ const CVPreview: React.FC = () => {
     <div className="relative h-full overflow-y-auto">
       <div
         id="cv-preview"
-        className="relative p-4 bg-white w-a4 h-a4 shadow-xl mx-auto"
+        className="relative p-4 bg-white w-a4 min-h-a4 shadow-xl mx-auto"
+        style={{
+          width: `${210 - pdfOptions.marginLeft - pdfOptions.marginRight}mm`,
+          minHeight: `${297 - pdfOptions.marginTop - pdfOptions.marginBottom}mm`,
+          padding: `${pdfOptions.marginTop}pt ${pdfOptions.marginRight}pt ${pdfOptions.marginBottom}pt ${pdfOptions.marginLeft}pt`,
+        }}
       >
         <Suspense fallback={<div>Loading template...</div>}>
           <SelectedTemplate cv={cv} />
