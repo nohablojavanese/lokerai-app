@@ -50,6 +50,7 @@ const CVPreview: React.FC = () => {
   const [pdfDataUrl, setPdfDataUrl] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pdfBlobUrl, setPdfBlobUrl] = useState<string | null>(null);
 
   const handleTemplateChange = (template: string) =>
     setSelectedTemplate(template);
@@ -139,8 +140,10 @@ const CVPreview: React.FC = () => {
     const pdf = await generatePDF();
     console.log("Generating PDF", pdf);
     if (pdf) {
-      const dataUrl = pdf.output("dataurlstring");
-      setPdfDataUrl(dataUrl);
+      const pdfBlob = pdf.output("blob");
+      const blobUrl = URL.createObjectURL(pdfBlob);
+      console.log("PDF Blob URL:", blobUrl);
+      setPdfBlobUrl(blobUrl);
       setShowPreview(true);
     }
   };
@@ -155,16 +158,21 @@ const CVPreview: React.FC = () => {
   const SelectedTemplate = templates[selectedTemplate];
 
   return (
-    <div
-      className="relative w-full h-full"
-      style={{ aspectRatio: "1 / 1.414" }}
-    >
+    <div className="w-full h-full max-w-3xl mx-auto">
+    <div className="relative w-full pb-[141.4%]"> {/* 141.4% maintains A4 aspect ratio */}
+      <div
+        className="absolute inset-0 bg-white shadow-xl text-black overflow-hidden"
+        style={{
+          padding: `${pdfOptions.marginTop}mm ${pdfOptions.marginRight}mm ${pdfOptions.marginBottom}mm ${pdfOptions.marginLeft}mm`,
+        }}
+      >
       <div
         id="cv-preview"
-        className="absolute inset-0 bg-white shadow-xl text-black overflow-hidden" 
+        className="absolute inset-0 bg-white shadow-xl text-black overflow-hidden max-w-max" 
         style={{
-          width: `calc(100%)`,
-          height: `calc(100% )`,
+          // width: `calc(100% - ${pdfOptions.marginLeft + pdfOptions.marginRight}mm)`,
+          // height: `calc(100% - ${pdfOptions.marginTop + pdfOptions.marginBottom}mm)`,
+          aspectRatio: "1 / 1.414",
           padding: `${pdfOptions.marginTop}mm ${pdfOptions.marginRight}mm ${pdfOptions.marginBottom}mm ${pdfOptions.marginLeft}mm`,
         }}
       >
@@ -173,7 +181,7 @@ const CVPreview: React.FC = () => {
         </Suspense>
       </div>
       <div className="fixed bottom-2 right-2">
-        <div className="flex space-x-2 justify-center mt-4 buttom-0">
+        <div className="flex space-x-2 justify-center mt-4 buttom-0 text-xs md:text-md">
           <button
             className={`px-4 py-2 bg-gray-600 hover:bg-blue-600 text-white rounded ${
               isGenerating ? "opacity-50 cursor-not-allowed" : ""
@@ -221,25 +229,32 @@ const CVPreview: React.FC = () => {
           onPdfOptionChange={handlePdfOptionChange}
         />
       </div>
-      {showPreview && pdfDataUrl && (
+      {showPreview && pdfBlobUrl && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-4 rounded-lg w-full h-full max-w-5xl max-h-[90vh] flex flex-col">
             <h2 className="text-2xl mb-4">PDF Preview</h2>
             <iframe
-              src={pdfDataUrl}
-              className="flex-grow w-full"
-              allow="fullscreen" // Allow fullscreen mode, disables download button in most browsers
-              // sandbox=""
+              src={pdfBlobUrl ?? ""}
+              className="flex-grow w-full h-[80vh]"
+              style={{ border: "1px solid #ccc" }}
             />
             <button
               className="mt-4 px-4 py-2 bg-red-500 text-white rounded self-end"
-              onClick={() => setShowPreview(false)}
+              onClick={() => {
+                setShowPreview(false);
+                if (pdfBlobUrl) {
+                  URL.revokeObjectURL(pdfBlobUrl);
+                }
+                setPdfBlobUrl(null);
+              }}
             >
               Close Preview
             </button>
           </div>
         </div>
       )}
+    </div>
+    </div>
     </div>
   );
 };

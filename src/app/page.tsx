@@ -9,14 +9,14 @@ import Popup from "@/components/ui/popup";
 export default function Home() {
   return (
     <Provider store={store}>
-    <main className="flex flex-col md:flex-row min-h-screen bg-gray-50 dark:bg-gray-900">
+    <main className="flex flex-col md:flex-row min-h-screen bg-gray-50 dark:bg-gray-900 ">
       <div className="bg-blue-50/20 dark:bg-blue-900/20 md:w-1/2 pt-10 ps-7 pe-5 overflow-y-auto min-fit rounded-r-3xl border-2 m-4 border-blue-400 dark:bg-gray-800 dark:border-gray-600">
         <CVEditor />
       </div>
-      <div className="md:w-1/2 bottom-0 p-5 overflow-y-auto bg-background bg-gray-50 min-w-fit dark:bg-gray-900">
+      <div className="md:w-1/2 h-screen p-5 overflow-y-auto bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <CVPreview />
       </div>
-      <Popup isOpen={true}/>
+      {/* <Popup isOpen={true}/> */}
     </main>
   </Provider>
   );
