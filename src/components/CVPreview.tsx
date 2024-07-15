@@ -39,10 +39,10 @@ const CVPreview: React.FC = () => {
   const [pdfOptions, setPdfOptions] = useState<PdfOptions>({
     format: "a4",
     orientation: "portrait",
-    marginTop: 20,
-    marginBottom: 20,
-    marginLeft: 20,
-    marginRight: 20,
+    marginTop: 0,
+    marginBottom: 0,
+    marginLeft: 0,
+    marginRight: 0,
     addPageNumbers: false,
   });
   const [showSidebar, setShowSidebar] = useState(false);
@@ -81,71 +81,48 @@ const CVPreview: React.FC = () => {
 
     try {
       const pdf = new jsPDF({
-        orientation: pdfOptions.orientation,
-        unit: "pt",
+        unit: "mm",
         format: pdfOptions.format,
+        orientation: pdfOptions.orientation,
       });
 
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
-      const margin = {
-        top: pdfOptions.marginTop,
-        right: pdfOptions.marginRight,
-        bottom: pdfOptions.marginBottom,
-        left: pdfOptions.marginLeft,
-      };
 
-      const contentWidth = pageWidth - margin.left - margin.right;
-      const contentHeight = pageHeight - margin.top - margin.bottom;
-
-      const scale = 2;
-      const canvasWidth = contentWidth * scale;
-      const canvasHeight = element.scrollHeight * scale;
+      const scale = 2; // Increase scale for better quality
+      const elementWidth = element.offsetWidth;
+      const elementHeight = element.offsetHeight;
 
       const canvas = await html2canvas(element, {
         scale: scale,
-        width: contentWidth,
-        height: element.scrollHeight,
-        windowWidth: contentWidth,
-        useCORS: true, // Ensure cross-origin images are allowed
+        width: elementWidth,
+        height: elementHeight,
+        useCORS: true,
       });
 
       const imgData = canvas.toDataURL("image/png");
 
-      let heightLeft = canvasHeight;
-      let position = 0;
-      let pageCount = 1;
+      // Calculate the scaling factor to fit the entire content
+      const scaleFactor = Math.min(
+        pageWidth / elementWidth,
+        pageHeight / elementHeight
+      );
 
-      while (heightLeft > 0) {
-        pdf.addImage(
-          imgData,
-          "PNG",
-          margin.left,
-          margin.top - position,
-          contentWidth,
-          canvasHeight / scale,
-          "",
-          "FAST"
-        );
+      const xOffset = (pageWidth - elementWidth * scaleFactor) / 2;
+      const yOffset = (pageHeight - elementHeight * scaleFactor) / 2;
 
-        heightLeft -= contentHeight * scale;
-        position += contentHeight * scale;
+      pdf.addImage(
+        imgData,
+        "PNG",
+        xOffset,
+        yOffset,
+        elementWidth * scaleFactor,
+        elementHeight * scaleFactor
+      );
 
-        if (heightLeft > 0) {
-          pdf.addPage();
-          pageCount++;
-        }
-
-        if (pdfOptions.addPageNumbers) {
-          pdf.setPage(pageCount);
-          pdf.setFontSize(10);
-          pdf.text(
-            `Page ${pageCount}`,
-            pageWidth / 2,
-            pageHeight - margin.bottom / 2,
-            { align: "center" }
-          );
-        }
+      if (pdfOptions.addPageNumbers) {
+        pdf.setFontSize(10);
+        pdf.text(`Page 1`, pageWidth / 2, pageHeight - 5, { align: "center" });
       }
 
       setIsGenerating(false);
@@ -158,8 +135,10 @@ const CVPreview: React.FC = () => {
     }
   };
 
+
   const handlePreviewPDF = async () => {
     const pdf = await generatePDF();
+    console.log("Generating PDF", pdf)
     if (pdf) {
       const dataUrl = pdf.output("dataurlstring");
       setPdfDataUrl(dataUrl);
@@ -177,21 +156,27 @@ const CVPreview: React.FC = () => {
   const SelectedTemplate = templates[selectedTemplate];
 
   return (
-    <div className="relative h-full overflow-y-auto">
+    <div
+      className="relative w-full h-full"
+      style={{ aspectRatio: "1 / 1.414" }}
+    >
       <div
         id="cv-preview"
-        className="relative p-4 bg-white w-a4 min-h-a4 shadow-xl mx-auto text-black"
+        className="absolute inset-0 bg-white shadow-xl text-black overflow-hidden p-8" // Add padding here
         style={{
-          width: `${210 - pdfOptions.marginLeft - pdfOptions.marginRight}mm`,
-          minHeight: `${297 - pdfOptions.marginTop - pdfOptions.marginBottom}mm`,
-          padding: `${pdfOptions.marginTop}pt ${pdfOptions.marginRight}pt ${pdfOptions.marginBottom}pt ${pdfOptions.marginLeft}pt`,
+          width: `calc(100% - ${
+            pdfOptions.marginLeft + pdfOptions.marginRight
+          }mm)`,
+          height: `calc(100% - ${
+            pdfOptions.marginTop + pdfOptions.marginBottom
+          }mm)`,
+          padding: `${pdfOptions.marginTop}mm ${pdfOptions.marginRight}mm ${pdfOptions.marginBottom}mm ${pdfOptions.marginLeft}mm`,
         }}
       >
         <Suspense fallback={<div>Loading template...</div>}>
           <SelectedTemplate cv={cv} />
         </Suspense>
       </div>
-
       <div className="fixed bottom-2 right-2">
         <div className="flex space-x-2 justify-center mt-4 buttom-0">
           <button
@@ -228,7 +213,6 @@ const CVPreview: React.FC = () => {
           </Alert>
         )}
       </div>
-
       <div
         className={`fixed left-0 top-0 h-full w-1/2 bg-gray-100 dark:bg-gray-900 p-4 overflow-y-auto transition-transform duration-300 ease-in-out drop-shadow-xl ${
           showSidebar ? "translate-x-0" : "-translate-x-full"
@@ -242,7 +226,6 @@ const CVPreview: React.FC = () => {
           onPdfOptionChange={handlePdfOptionChange}
         />
       </div>
-
       {showPreview && pdfDataUrl && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-4 rounded-lg w-full h-full max-w-5xl max-h-[90vh] flex flex-col">
