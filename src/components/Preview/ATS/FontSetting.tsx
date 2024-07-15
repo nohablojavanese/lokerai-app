@@ -19,13 +19,15 @@ const FontSettings: React.FC = () => {
   };
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow">
-      <h3 className="text-lg font-semibold mb-4">Font Settings</h3>
+    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
+      <h3 className="text-lg font-semibold mb-4 text-black dark:text-white">
+        Font Settings
+      </h3>
       <div className="space-y-4">
         <div>
           <label
             htmlFor="headerFont"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300"
           >
             Header Font
           </label>
@@ -34,10 +36,9 @@ const FontSettings: React.FC = () => {
             name="headerFont"
             value={fontSettings.headerFont}
             onChange={handleFontChange}
-            className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+            className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
           >
             <option value="Poppins">Poppins</option>
-
             <option value="Arial" className="font-sans">
               Arial
             </option>
@@ -64,7 +65,7 @@ const FontSettings: React.FC = () => {
         <div>
           <label
             htmlFor="bodyFont"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300"
           >
             Body Font
           </label>
@@ -73,7 +74,7 @@ const FontSettings: React.FC = () => {
             name="bodyFont"
             value={fontSettings.bodyFont}
             onChange={handleFontChange}
-            className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+            className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
           >
             <option value="Arial" className="font-sans">
               Arial
@@ -101,7 +102,7 @@ const FontSettings: React.FC = () => {
         <div>
           <label
             htmlFor="fontSize"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300"
           >
             Font Size
           </label>
@@ -113,7 +114,7 @@ const FontSettings: React.FC = () => {
             onChange={handleFontChange}
             min="8"
             max="24"
-            className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+            className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
           />
         </div>
       </div>

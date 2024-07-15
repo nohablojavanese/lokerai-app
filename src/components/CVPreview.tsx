@@ -14,8 +14,6 @@ const Template4 = lazy(() => import("./Preview/NewModel"));
 const ATS1 = lazy(() => import("./Preview/ClaudeATS1"));
 const ATS2 = lazy(() => import("./Preview/ClaudeATS2"));
 
-
-
 const templates: Record<string, React.ComponentType<{ cv: CVState }>> = {
   ats: ATSTemplate,
   stylized: StylizedTemplate,
@@ -23,7 +21,6 @@ const templates: Record<string, React.ComponentType<{ cv: CVState }>> = {
   template4: Template4,
   ATS1: ATS1,
   ATS2: ATS2,
-
 };
 
 interface PdfOptions {
@@ -110,10 +107,11 @@ const CVPreview: React.FC = () => {
         width: contentWidth,
         height: element.scrollHeight,
         windowWidth: contentWidth,
+        useCORS: true, // Ensure cross-origin images are allowed
       });
 
       const imgData = canvas.toDataURL("image/png");
-      
+
       let heightLeft = canvasHeight;
       let position = 0;
       let pageCount = 1;
@@ -129,7 +127,7 @@ const CVPreview: React.FC = () => {
           "",
           "FAST"
         );
-        
+
         heightLeft -= contentHeight * scale;
         position += contentHeight * scale;
 
@@ -182,7 +180,7 @@ const CVPreview: React.FC = () => {
     <div className="relative h-full overflow-y-auto">
       <div
         id="cv-preview"
-        className="relative p-4 bg-white w-a4 min-h-a4 shadow-xl mx-auto"
+        className="relative p-4 bg-white w-a4 min-h-a4 shadow-xl mx-auto text-black"
         style={{
           width: `${210 - pdfOptions.marginLeft - pdfOptions.marginRight}mm`,
           minHeight: `${297 - pdfOptions.marginTop - pdfOptions.marginBottom}mm`,
@@ -230,10 +228,9 @@ const CVPreview: React.FC = () => {
           </Alert>
         )}
       </div>
-      {/* </div> */}
 
       <div
-        className={`fixed left-0 top-0 h-full w-1/2 bg-gray-100 p-4 overflow-y-auto transition-transform duration-300 ease-in-out drop-shadow-xl ${
+        className={`fixed left-0 top-0 h-full w-1/2 bg-gray-100 dark:bg-gray-900 p-4 overflow-y-auto transition-transform duration-300 ease-in-out drop-shadow-xl ${
           showSidebar ? "translate-x-0" : "-translate-x-full"
         }`}
       >
