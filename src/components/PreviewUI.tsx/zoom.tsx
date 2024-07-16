@@ -27,7 +27,7 @@ const PreviewControls: React.FC<PreviewControlsProps> = ({
     const [error, setError] = useState<string | null>(null);
 
   return (
-    <div className="fixed bottom-2 right-2">
+    <div className="fixed bottom-2 right-2 z-20">
       <div className="flex space-x-2 justify-center mt-4 buttom-0 text-xs md:text-md">
         <div className="mt-4 flex justify-center items-center">
           <button
