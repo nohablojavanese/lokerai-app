@@ -1,3 +1,4 @@
+import { nextui } from "@nextui-org/theme";
 import type { Config } from "tailwindcss";
 
 const config = {
@@ -7,6 +8,8 @@ const config = {
     "./components/**/*.{ts,tsx}",
     "./app/**/*.{ts,tsx}",
     "./src/**/*.{ts,tsx}",
+    "./node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}",
+
   ],
   prefix: "",
   theme: {
@@ -19,10 +22,10 @@ const config = {
     },
     extend: {
       width: {
-        'a4': '794px',
+        a4: "794px",
       },
       height: {
-        'a4': '1122px',
+        a4: "1122px",
       },
       fontFamily: {
         poppins: ["Poppins", "sans-serif"],
@@ -83,7 +86,7 @@ const config = {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [require("tailwindcss-animate"),nextui()],
 } satisfies Config;
 
 export default config;

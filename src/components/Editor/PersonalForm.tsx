@@ -5,6 +5,7 @@ import * as yup from "yup";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
 import { updatePersonalInfo } from "../../redux/cvSlice";
+import { Input } from "@nextui-org/Input";
 
 const personalInfoSchema = yup.object().shape({
   name: yup.string().required("Name is required"),
@@ -43,7 +44,7 @@ const PersonalInfoForm: React.FC = () => {
           <label htmlFor="name" className="block mb-2">
             Nama Depan
           </label>
-          <input
+          <Input
             type="text"
             id="name"
             {...register("name")}
@@ -54,7 +55,7 @@ const PersonalInfoForm: React.FC = () => {
           <label htmlFor="last" className="block mb-2">
             Nama Belakang
           </label>
-          <input
+          <Input
             type="text"
             id="last"
             {...register("last")}
@@ -69,7 +70,7 @@ const PersonalInfoForm: React.FC = () => {
         <label htmlFor="alamat" className="block mb-2">
           Alamat
         </label>
-        <input
+        <Input
           type="alamat"
           id="alamat"
           {...register("alamat")}
@@ -83,7 +84,7 @@ const PersonalInfoForm: React.FC = () => {
         <label htmlFor="email" className="block mb-2">
           Email
         </label>
-        <input
+        <Input
           type="email"
           id="email"
           {...register("email")}
@@ -97,7 +98,7 @@ const PersonalInfoForm: React.FC = () => {
         <label htmlFor="phone" className="block mb-2">
           Phone
         </label>
-        <input
+        <Input
           type="tel"
           id="phone"
           {...register("phone")}

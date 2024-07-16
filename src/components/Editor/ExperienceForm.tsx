@@ -11,6 +11,10 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Input } from "@nextui-org/Input";
+import {DateRangePicker} from "@nextui-org/date-picker";
+
+
 const experienceSchema = yup.object().shape({
   company: yup.string().required("Company is required"),
   position: yup.string().required("Position is required"),

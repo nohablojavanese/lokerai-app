@@ -8,6 +8,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
+import { Input } from "@nextui-org/Input";
 
 
 const SkillsForm: React.FC = () => {

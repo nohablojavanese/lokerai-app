@@ -4,7 +4,7 @@ import { Inter, Poppins } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/ui/navbar";
 import ReduxProvider from "@/components/ReduxProvider/Redux";
-
+import { NextUIProvider } from "@nextui-org/system";
 const inter = Inter({ subsets: ["latin"] });
 const poppins = Poppins({ weight: ["300"], subsets: ["latin"] });
 
@@ -29,7 +29,7 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             <Navbar />
-            {children}
+            <NextUIProvider>{children}</NextUIProvider>
           </ThemeProvider>
         </ReduxProvider>
       </body>

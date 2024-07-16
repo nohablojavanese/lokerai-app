@@ -11,6 +11,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Input } from "@nextui-org/Input";
 
 const educationSchema = yup.object().shape({
   school: yup.string().required("School is required"),
@@ -72,7 +73,7 @@ const EducationForm: React.FC = () => {
               <label htmlFor="school" className="block mb-2 text-black dark:text-white">
                 School
               </label>
-              <input
+              <Input
                 type="text"
                 id="school"
                 {...register("school")}
