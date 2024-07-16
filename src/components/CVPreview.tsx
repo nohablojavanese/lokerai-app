@@ -164,7 +164,7 @@ const CVPreview: React.FC = () => {
   const SelectedTemplate = templates[selectedTemplate];
 
   return (
-    <div className="w-full h-full max-w-3xl mx-auto">
+    <div className="w-full h-full max-w-3xl mx-auto z-50">
        <PreviewControls
             zoom={zoom}
             onZoomIn={handleZoomIn}
