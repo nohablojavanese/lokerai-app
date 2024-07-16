@@ -4,6 +4,7 @@ import EducationForm from "./Editor/EducationalForm";
 import ExperienceForm from "./Editor/ExperienceForm";
 import SkillsForm from "./Editor/SkillsForm";
 import { ModeToggle } from "./Provider/Theme/DarkMode";
+import LinkedInProfileForm from "./ui/profile";
 
 const CVEditor: React.FC = () => {
   return (
@@ -13,6 +14,8 @@ const CVEditor: React.FC = () => {
         <ModeToggle />
       </div>
       <div className="space-y-12">
+        <LinkedInProfileForm />
+
         <section>
           <h2 className="text-2xl font-bold mb-4">Personal Information</h2>
           <PersonalInfoForm />
