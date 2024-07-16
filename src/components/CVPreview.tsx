@@ -5,7 +5,9 @@ import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 import CVSidebar from "./Preview/Sidebar/Sidebar";
 import { CVState } from "@/types";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+// import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import PreviewControls from "./PreviewUI.tsx/zoom";
+import PDFPreviewModal from "./PreviewUI.tsx/previewmodal";
 
 const ATSTemplate = lazy(() => import("./Preview/ATSTemplate"));
 const StylizedTemplate = lazy(() => import("./Preview/StylizedTemplate"));
@@ -47,7 +49,7 @@ const CVPreview: React.FC = () => {
   });
   const [showSidebar, setShowSidebar] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
-  const [pdfDataUrl, setPdfDataUrl] = useState<string | null>(null);
+  // const [pdfDataUrl, setPdfDataUrl] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pdfBlobUrl, setPdfBlobUrl] = useState<string | null>(null);
@@ -155,7 +157,7 @@ const CVPreview: React.FC = () => {
   const handleDownloadPDF = async () => {
     const pdf = await generatePDF();
     if (pdf) {
-      pdf.save("LokerAI_CVMaker.pdf");
+      pdf.save(`${cv.personalInfo.name}_TawaKarir_CV.pdf`);
     }
   };
 
@@ -166,8 +168,7 @@ const CVPreview: React.FC = () => {
       <div className="relative w-full pb-[141.4%] ">
         <div
           className="absolute inset-0 bg-red-100 shadow-xl text-black overflow-hidden"
-          style={{
-          }}
+          style={{}}
         >
           <div
             id="cv-preview"
@@ -176,66 +177,24 @@ const CVPreview: React.FC = () => {
               transform: `scale(${zoom / 100})`,
               transformOrigin: "center",
               padding: `${pdfOptions.marginTop}mm ${pdfOptions.marginRight}mm ${pdfOptions.marginBottom}mm ${pdfOptions.marginLeft}mm`,
-
             }}
           >
             <Suspense fallback={<div>Loading template...</div>}>
               <SelectedTemplate cv={cv} />
             </Suspense>
           </div>
-        
 
-          <div className="fixed bottom-2 right-2">
-            <div className="flex space-x-2 justify-center mt-4 buttom-0 text-xs md:text-md">
-              <div className="mt-4 flex justify-center items-center">
-                <button
-                  onClick={handleZoomOut}
-                  className="px-2 py-1 bg-gray-200 rounded"
-                >
-                  - Zoom Out
-                </button>
-                <span className="mx-2">{zoom}%</span>
-                <button
-                  onClick={handleZoomIn}
-                  className="px-2 py-1 bg-gray-200 rounded"
-                >
-                  + Zoom In
-                </button>
-              </div>
-              <button
-                className={`px-4 py-2 bg-gray-600 hover:bg-blue-600 text-white rounded ${
-                  isGenerating ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-                onClick={() => setShowSidebar(!showSidebar)}
-              >
-                {showSidebar ? "Hide Options" : "Show Options"}
-              </button>
-              <button
-                className={`px-4 py-2 bg-gray-600 hover:bg-gray-500 text-white rounded ${
-                  isGenerating ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-                onClick={handlePreviewPDF}
-                disabled={isGenerating}
-              >
-                {isGenerating ? "Generating..." : "Preview PDF"}
-              </button>
-              <button
-                className={`px-4 py-2 bg-gray-600 hover:bg-gray-500 text-white rounded ${
-                  isGenerating ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-                onClick={handleDownloadPDF}
-                disabled={isGenerating}
-              >
-                {isGenerating ? "Generating..." : "Download PDF"}
-              </button>
-            </div>
-            {error && (
-              <Alert variant="destructive" className="mt-4">
-                <AlertTitle>Error</AlertTitle>
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-          </div>
+          <PreviewControls
+            zoom={zoom}
+            onZoomIn={handleZoomIn}
+            onZoomOut={handleZoomOut}
+            showSidebar={showSidebar}
+            onToggleSidebar={() => setShowSidebar(!showSidebar)}
+            onPreviewPDF={handlePreviewPDF}
+            onDownloadPDF={handleDownloadPDF}
+            isGenerating={isGenerating}
+          />
+
           <div
             className={`fixed left-0 top-0 h-full w-1/2 bg-gray-100 dark:bg-gray-900 p-4 overflow-y-auto transition-transform duration-300 ease-in-out drop-shadow-xl ${
               showSidebar ? "translate-x-0" : "-translate-x-full"
@@ -249,30 +208,17 @@ const CVPreview: React.FC = () => {
               onPdfOptionChange={handlePdfOptionChange}
             />
           </div>
-          {showPreview && pdfBlobUrl && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-              <div className="bg-white p-4 rounded-lg w-full h-full max-w-5xl max-h-[90vh] flex flex-col">
-                <h2 className="text-2xl mb-4">PDF Preview</h2>
-                <iframe
-                  src={pdfBlobUrl ?? ""}
-                  className="flex-grow w-full h-[80vh]"
-                  style={{ border: "1px solid #ccc" }}
-                />
-                <button
-                  className="mt-4 px-4 py-2 bg-red-500 text-white rounded self-end"
-                  onClick={() => {
-                    setShowPreview(false);
-                    if (pdfBlobUrl) {
-                      URL.revokeObjectURL(pdfBlobUrl);
-                    }
-                    setPdfBlobUrl(null);
-                  }}
-                >
-                  Close Preview
-                </button>
-              </div>
-            </div>
-          )}
+          <PDFPreviewModal
+            show={showPreview}
+            pdfBlobUrl={pdfBlobUrl}
+            onClose={() => {
+              setShowPreview(false);
+              if (pdfBlobUrl) {
+                URL.revokeObjectURL(pdfBlobUrl);
+              }
+              setPdfBlobUrl(null);
+            }}
+          />
         </div>
       </div>
     </div>
