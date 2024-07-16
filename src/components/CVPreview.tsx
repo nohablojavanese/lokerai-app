@@ -165,13 +165,24 @@ const CVPreview: React.FC = () => {
 
   return (
     <div className="w-full h-full max-w-3xl mx-auto">
+       <PreviewControls
+            zoom={zoom}
+            onZoomIn={handleZoomIn}
+            onZoomOut={handleZoomOut}
+            showSidebar={showSidebar}
+            onToggleSidebar={() => setShowSidebar(!showSidebar)}
+            onPreviewPDF={handlePreviewPDF}
+            onDownloadPDF={handleDownloadPDF}
+            isGenerating={isGenerating}
+            
+          />
       <div className="relative w-full pb-[141.4%] ">
         <div
           className="absolute inset-0 bg-red-100 shadow-xl text-black overflow-hidden"
-          style={{}}
+          style={{ transform: `scale(${zoom / 100})` }}
+          id="cv-preview"
         >
           <div
-            id="cv-preview"
             className="w-full h-full overflow-auto bg-white"
             style={{
               transform: `scale(${zoom / 100})`,
@@ -183,20 +194,11 @@ const CVPreview: React.FC = () => {
               <SelectedTemplate cv={cv} />
             </Suspense>
           </div>
-
-          <PreviewControls
-            zoom={zoom}
-            onZoomIn={handleZoomIn}
-            onZoomOut={handleZoomOut}
-            showSidebar={showSidebar}
-            onToggleSidebar={() => setShowSidebar(!showSidebar)}
-            onPreviewPDF={handlePreviewPDF}
-            onDownloadPDF={handleDownloadPDF}
-            isGenerating={isGenerating}
-          />
+          <p className="absolute text-xs text-gray-200 right-10 bottom-10">LokerAI.com</p>
+      </div>
 
           <div
-            className={`fixed left-0 top-0 h-full w-1/2 bg-gray-100 dark:bg-gray-900 p-4 overflow-y-auto transition-transform duration-300 ease-in-out drop-shadow-xl ${
+            className={`fixed z-40 left-0 top-0 h-full w-1/2 bg-gray-100 dark:bg-gray-900 p-4 overflow-y-auto transition-transform duration-300 ease-in-out drop-shadow-xl ${
               showSidebar ? "translate-x-0" : "-translate-x-full"
             }`}
           >
@@ -220,7 +222,6 @@ const CVPreview: React.FC = () => {
             }}
           />
         </div>
-      </div>
     </div>
   );
 };

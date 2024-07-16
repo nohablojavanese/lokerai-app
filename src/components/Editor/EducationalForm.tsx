@@ -11,12 +11,18 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Input } from "@nextui-org/Input";
+import { Input } from "@nextui-org/input";
+import { Button } from "@nextui-org/button";
 
 const educationSchema = yup.object().shape({
   school: yup.string().required("School is required"),
   degree: yup.string().required("Degree is required"),
-  graduationYear: yup.string().required("Graduation year is required"),
+  graduationYear: yup
+  .number()
+  .typeError('Graduation year must be a number') 
+  .required('Graduation year is required')
+  .min(1945, 'Veteran Anda Ya!?!')
+  .max(2040, 'Sekolah di Masa Depan?'),
 });
 
 const EducationForm: React.FC = () => {
@@ -65,99 +71,65 @@ const EducationForm: React.FC = () => {
     <div>
       <Accordion type="single" collapsible>
         <AccordionItem value="item-1">
-          <AccordionTrigger className="text-2xl font-bold mb-0">
+          <AccordionTrigger className="text-2xl font-bold">
             Education
           </AccordionTrigger>
           <form onSubmit={handleSubmit(onSubmit)} className="mb-6">
             <AccordionContent className="mb-4">
-              <label htmlFor="school" className="block mb-2 text-black dark:text-white">
-                School
-              </label>
               <Input
-                type="text"
-                id="school"
                 {...register("school")}
-                className="w-full p-2 border rounded text-black dark:text-white"
+                label="School"
+                isRequired
+                labelPlacement="outside"
+                isInvalid={!!errors.school}
+                errorMessage={errors.school?.message}
               />
-              {errors.school && (
-                <span className="text-red-500">{errors.school.message}</span>
-              )}
             </AccordionContent>
             <AccordionContent className="mb-4">
-              <label htmlFor="degree" className="block mb-2">
-                Degree
-              </label>
-              <input
-                type="text"
-                id="degree"
+              <Input
                 {...register("degree")}
-                className="w-full p-2 border rounded text-black dark:text-white"
+                label="Degree"
+                isRequired
+                labelPlacement="outside"
+                isInvalid={!!errors.degree}
+                errorMessage={errors.degree?.message}
               />
-              {errors.degree && (
-                <span className="text-red-500">{errors.degree.message}</span>
-              )}
             </AccordionContent>
             <AccordionContent className="mb-4">
-              <label htmlFor="graduationYear" className="block mb-2">
-                Graduation Year
-              </label>
-              <input
-                type="text"
-                id="graduationYear"
+              <Input
                 {...register("graduationYear")}
-                className="w-full p-2 border rounded text-black dark:text-white"
+                label="Graduation Year"
+                type="number"
+                isRequired
+                labelPlacement="outside"
+                isInvalid={!!errors.graduationYear}
+                errorMessage={errors.graduationYear?.message}
               />
-              {errors.graduationYear && (
-                <span className="text-red-500">
-                  {errors.graduationYear.message}
-                </span>
-              )}
             </AccordionContent>
             <AccordionContent>
-              <button
-                type="submit"
-                className="bg-blue-500 text-white px-4 py-2 rounded mr-2"
-              >
+              <Button type="submit" color="primary">
                 {editIndex !== null ? "Update Education" : "Add Education"}
-              </button>
+              </Button>
               {editIndex !== null && (
-                <button
-                  type="button"
-                  onClick={cancelEdit}
-                  className="bg-gray-500 text-white px-4 py-2 rounded"
-                >
+                <Button onClick={cancelEdit} color="secondary" className="ml-2">
                   Cancel Edit
-                </button>
+                </Button>
               )}
             </AccordionContent>
           </form>
 
           <AccordionContent className="mt-6">
-            {/* <h3 className="text-xl font-semibold mb-4">Added Education</h3> */}
             {education.map((edu, index) => (
-              
               <div key={index} className="mb-4 p-4 border rounded">
-                <p>
-                  <strong>School:</strong> {edu.school}
-                </p>
-                <p>
-                  <strong>Degree:</strong> {edu.degree}
-                </p>
-                <p>
-                  <strong>Graduation Year:</strong> {edu.graduationYear}
-                </p>
-                <button
-                  onClick={() => handleEdit(index)}
-                  className="mt-2 bg-blue-500 text-white px-4 py-2 rounded mr-2"
-                >
+                <p><strong>School:</strong> {edu.school}</p>
+                <p><strong>Degree:</strong> {edu.degree}</p>
+                <p><strong>Graduation Year:</strong> {edu.graduationYear}</p>
+                <Button onClick={() => handleEdit(index)} color="primary" size="sm" className="mt-2 mr-2">
                   Edit
-                </button>
-                <button
-                  onClick={() => handleRemove(index)}
-                  className="mt-2 bg-red-500 text-white px-4 py-2 rounded"
-                >
+                </Button>
+                <Button onClick={() => handleRemove(index)} color="danger" size="sm" className="mt-2">
                   Remove
-                </button>
+                </Button>
               </div>
             ))}
           </AccordionContent>

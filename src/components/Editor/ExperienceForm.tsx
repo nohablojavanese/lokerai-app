@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useDispatch, useSelector } from "react-redux";
-import { addExperience, removeExperience, CVState } from "../../redux/cvSlice";
+import { addExperience, removeExperience, updateExperience, CVState } from "../../redux/cvSlice";
 import { RootState } from "../../redux/store";
 import {
   Accordion,
@@ -11,16 +11,17 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Input } from "@nextui-org/Input";
-import {DateRangePicker} from "@nextui-org/date-picker";
-
+import { Input, Textarea } from "@nextui-org/input";
+import { Button } from "@nextui-org/button";
+import { Checkbox } from "@nextui-org/checkbox";
 
 const experienceSchema = yup.object().shape({
   company: yup.string().required("Company is required"),
   position: yup.string().required("Position is required"),
   startDate: yup.string().required("Start date is required"),
-  endDate: yup.string().required("End date is required"),
+  endDate: yup.string().required("Start date is required"),
   description: yup.string().required("Description is required"),
+  currentlyWorkHere: yup.boolean().default(false),
 });
 
 const ExperienceForm: React.FC = () => {
@@ -34,18 +35,34 @@ const ExperienceForm: React.FC = () => {
     formState: { errors },
     reset,
     setValue,
+    watch,
   } = useForm({
     resolver: yupResolver(experienceSchema),
+    defaultValues: {
+      currentlyWorkHere: false,
+    },
   });
 
-  const onSubmit = (data: CVState["experience"][0]) => {
-    dispatch(addExperience(data));
+  const currentlyWorkHere = watch("currentlyWorkHere");
+
+  const onSubmit = (data: CVState["experience"][0] & { currentlyWorkHere: boolean }) => {
+    const { currentlyWorkHere, ...experienceData } = data;
+    if (currentlyWorkHere) {
+      experienceData.endDate = "Present";
+    }
+    if (editIndex !== null) {
+      dispatch(updateExperience({ index: editIndex, experience: experienceData }));
+      setEditIndex(null);
+    } else {
+      dispatch(addExperience(experienceData));
+    }
     reset();
   };
 
   const handleRemove = (index: number) => {
     dispatch(removeExperience(index));
   };
+
   const handleEdit = (index: number) => {
     const experienceItem = experience[index];
     setValue("company", experienceItem.company);
@@ -53,7 +70,7 @@ const ExperienceForm: React.FC = () => {
     setValue("startDate", experienceItem.startDate);
     setValue("endDate", experienceItem.endDate);
     setValue("description", experienceItem.description);
-
+    setValue("currentlyWorkHere", experienceItem.endDate === "Present");
     setEditIndex(index);
   };
 
@@ -71,133 +88,203 @@ const ExperienceForm: React.FC = () => {
           </AccordionTrigger>
           <form onSubmit={handleSubmit(onSubmit)} className="mb-6">
             <AccordionContent className="mb-4">
-              <label htmlFor="company" className="block mb-2">
-                Company
-              </label>
-              <input
-                type="text"
-                id="company"
+              <Input
                 {...register("company")}
-                className="w-full p-2 border rounded"
+                label="Company"
+                isRequired
+                labelPlacement="outside"
+                isInvalid={!!errors.company}
+                errorMessage={errors.company?.message}
               />
-              {errors.company && (
-                <span className="text-red-500">{errors.company.message}</span>
-              )}
             </AccordionContent>
             <AccordionContent className="mb-4">
-              <label htmlFor="position" className="block mb-2">
-                Position
-              </label>
-              <input
-                type="text"
-                id="position"
+              <Input
                 {...register("position")}
-                className="w-full p-2 border rounded"
+                label="Position"
+                isRequired
+                labelPlacement="outside"
+                isInvalid={!!errors.position}
+                errorMessage={errors.position?.message}
               />
-              {errors.position && (
-                <span className="text-red-500">{errors.position.message}</span>
-              )}
             </AccordionContent>
             <AccordionContent className="mb-4">
-              <label htmlFor="startDate" className="block mb-2">
-                Start Date
-              </label>
-              <input
-                type="date"
-                id="startDate"
+              <Input
                 {...register("startDate")}
-                className="w-full p-2 border rounded"
+                label="Start Date"
+                type="date"
+                isRequired
+                labelPlacement="outside"
+                isInvalid={!!errors.startDate}
+                errorMessage={errors.startDate?.message}
               />
-              {errors.startDate && (
-                <span className="text-red-500">{errors.startDate.message}</span>
-              )}
             </AccordionContent>
             <AccordionContent className="mb-4">
-              <label htmlFor="endDate" className="block mb-2">
-                End Date
-              </label>
-              <input
-                type="text"
-                id="endDate"
+              <Input
                 {...register("endDate")}
-                className="w-full p-2 border rounded"
+                label="End Date"
+                type="date"
+                // isRequired={!currentlyWorkHere}
+                labelPlacement="outside"
+                isInvalid={!!errors.endDate}
+                errorMessage={errors.endDate?.message}
+                // isDisabled={currentlyWorkHere}
               />
-              {errors.endDate && (
-                <span className="text-red-500">{errors.endDate.message}</span>
-              )}
             </AccordionContent>
-            <AccordionContent>
-              <label htmlFor="description" className="block mb-2">
-                Description
-              </label>
-              <textarea
-                id="description"
-                {...register("description")}
-                className="w-full p-2 border rounded"
-              />
-              {errors.description && (
-                <span className="text-red-500">
-                  {errors.description.message}
-                </span>
-              )}
-            </AccordionContent>
-            <AccordionContent></AccordionContent>
             <AccordionContent className="mb-4">
-              <button
-                type="submit"
-                className="bg-blue-500 text-white px-4 py-2 rounded mr-2"
+              <Checkbox
+                {...register("currentlyWorkHere")}
+                color="primary"
               >
-                {editIndex !== null ? "Update Education" : "Add Experience"}
-              </button>
+                I currently work here
+              </Checkbox>
+            </AccordionContent>
+            <AccordionContent className="mb-4">
+              <Textarea
+                {...register("description")}
+                label="Description"
+                isRequired
+                labelPlacement="outside"
+                isInvalid={!!errors.description}
+                errorMessage={errors.description?.message}
+              />
+            </AccordionContent>
+            <AccordionContent className="mb-4">
+              <Button type="submit" color="primary">
+                {editIndex !== null ? "Update Experience" : "Add Experience"}
+              </Button>
               {editIndex !== null && (
-                <button
-                  type="button"
-                  onClick={cancelEdit}
-                  className="bg-gray-500 text-white px-4 py-2 rounded"
-                >
+                <Button onClick={cancelEdit} color="secondary" className="ml-2">
                   Cancel Edit
-                </button>
+                </Button>
               )}
             </AccordionContent>
           </form>
 
-          {/* <AccordionContent className="text-xl font-semibold mb-4">
-            Added Experience
-          </AccordionContent> */}
-
           {experience.map((exp, index) => (
-            <div key={index} className="mb-4 p-4 border rounded bg-white">
-              <p>
-                <strong>Company:</strong> {exp.company}
-              </p>
-              <p>
-                <strong>Position:</strong> {exp.position}
-              </p>
-              <p>
-                <strong>Start Date:</strong> {exp.startDate}
-              </p>
-              <p>
-                <strong>End Date:</strong> {exp.endDate}
-              </p>
-              <p>
-                <strong>Description:</strong> {exp.description}
-              </p>
-              <button
-                onClick={() => handleEdit(index)}
-                className="mt-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded mr-2"
-              >
-                Edit
-              </button>
-              <button
-                onClick={() => handleRemove(index)}
-                className="mt-2 bg-gray-200 hover:bg-red-500 text-red-600 hover:text-white px-4 py-2 rounded"
-              >
-                Remove
-              </button>
-            </div>
+            <ExperienceItem
+              key={index}
+              exp={exp}
+              index={index}
+              onEdit={handleEdit}
+              onRemove={handleRemove}
+            />
           ))}
         </AccordionItem>
       </Accordion>
+    </div>
+  );
+};
+
+interface ExperienceItemProps {
+  exp: CVState["experience"][0];
+  index: number;
+  onEdit: (index: number) => void;
+  onRemove: (index: number) => void;
+}
+
+const ExperienceItem: React.FC<ExperienceItemProps> = ({ exp, index, onEdit, onRemove }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const dispatch = useDispatch();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    watch,
+  } = useForm({
+    resolver: yupResolver(experienceSchema),
+    defaultValues: {
+      ...exp,
+      currentlyWorkHere: exp.endDate === "Present",
+    },
+  });
+
+  const currentlyWorkHere = watch("currentlyWorkHere");
+
+  const onSubmit = (data: CVState["experience"][0] & { currentlyWorkHere: boolean }) => {
+    const { currentlyWorkHere, ...experienceData } = data;
+    if (currentlyWorkHere) {
+      experienceData.endDate = "Present";
+    }
+    dispatch(updateExperience({ index, experience: experienceData }));
+    setIsEditing(false);
+  };
+
+  return (
+    <div className="mb-4 p-4 border rounded bg-white">
+      {isEditing ? (
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <Input
+            {...register("company")}
+            label="Company"
+            isRequired
+            labelPlacement="outside"
+            isInvalid={!!errors.company}
+            errorMessage={errors.company?.message}
+          />
+          <Input
+            {...register("position")}
+            label="Position"
+            isRequired
+            labelPlacement="outside"
+            isInvalid={!!errors.position}
+            errorMessage={errors.position?.message}
+          />
+          <Input
+            {...register("startDate")}
+            label="Start Date"
+            type="date"
+            isRequired
+            labelPlacement="outside"
+            isInvalid={!!errors.startDate}
+            errorMessage={errors.startDate?.message}
+          />
+          <Input
+            {...register("endDate")}
+            label="End Date"
+            type="date"
+            isRequired={!currentlyWorkHere}
+            labelPlacement="outside"
+            isInvalid={!!errors.endDate}
+            errorMessage={errors.endDate?.message}
+            isDisabled={currentlyWorkHere}
+          />
+          <Checkbox
+            {...register("currentlyWorkHere")}
+            color="primary"
+          >
+            I currently work here
+          </Checkbox>
+          <Textarea
+            {...register("description")}
+            label="Description"
+            isRequired
+            labelPlacement="outside"
+            isInvalid={!!errors.description}
+            errorMessage={errors.description?.message}
+          />
+          <Button type="submit" color="primary" className="mt-2 mr-2">
+            Save
+          </Button>
+          <Button onClick={() => setIsEditing(false)} color="secondary" className="mt-2">
+            Cancel
+          </Button>
+        </form>
+      ) : (
+        <>
+          <p><strong>Company:</strong> {exp.company}</p>
+          <p><strong>Position:</strong> {exp.position}</p>
+          <p><strong>Start Date:</strong> {exp.startDate}</p>
+          <p><strong>End Date:</strong> {exp.endDate}</p>
+          <p><strong>Description:</strong> {exp.description}</p>
+          <Button onClick={() => setIsEditing(true)} color="primary" className="mt-2 mr-2">
+            Edit
+          </Button>
+          <Button onClick={() => onRemove(index)} color="danger" className="mt-2">
+            Remove
+          </Button>
+        </>
+      )}
     </div>
   );
 };
