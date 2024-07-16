@@ -36,7 +36,7 @@ const initialState: CVState = {
   },
   personalInfo: {
     name: 'Nama Depan',
-    last: 'Belakang ',
+    last: 'Belakang',
     alamat: 'Jln. Jalan JK 9AK',
     email: 'email@contoh.com',
     phone: "0821xxxxxxxx",
@@ -83,6 +83,9 @@ const cvSlice = createSlice({
     updateFontSettings: (state, action: PayloadAction<Partial<CVState['fontSettings']>>) => {
       state.fontSettings = { ...state.fontSettings, ...action.payload };
     },
+    hydrate: (state, action: PayloadAction<CVState>) => {
+      return action.payload;
+    },
   },
 });
 
@@ -97,6 +100,7 @@ export const {
   addSkill,
   removeSkill,
   updateFontSettings,
+  hydrate
 } = cvSlice.actions;
 
 export default cvSlice.reducer;
