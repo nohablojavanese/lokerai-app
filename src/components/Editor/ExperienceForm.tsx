@@ -3,7 +3,13 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useDispatch, useSelector } from "react-redux";
-import { addExperience, removeExperience, updateExperience, CVState } from "../../redux/cvSlice";
+import {
+  addExperience,
+  removeExperience,
+  updateExperience,
+  reorderExperience,
+  CVState,
+} from "../../redux/cvSlice";
 import { RootState } from "../../redux/store";
 import {
   Accordion,
@@ -14,6 +20,8 @@ import {
 import { Input, Textarea } from "@nextui-org/input";
 import { Button } from "@nextui-org/button";
 import { Checkbox } from "@nextui-org/checkbox";
+import { FaCaretDown, FaCaretUp } from "react-icons/fa";
+import { motion, AnimatePresence } from "framer-motion";
 
 const experienceSchema = yup.object().shape({
   company: yup.string().required("Company is required"),
@@ -45,13 +53,17 @@ const ExperienceForm: React.FC = () => {
 
   const currentlyWorkHere = watch("currentlyWorkHere");
 
-  const onSubmit = (data: CVState["experience"][0] & { currentlyWorkHere: boolean }) => {
+  const onSubmit = (
+    data: CVState["experience"][0] & { currentlyWorkHere: boolean }
+  ) => {
     const { currentlyWorkHere, ...experienceData } = data;
     if (currentlyWorkHere) {
       experienceData.endDate = "Present";
     }
     if (editIndex !== null) {
-      dispatch(updateExperience({ index: editIndex, experience: experienceData }));
+      dispatch(
+        updateExperience({ index: editIndex, experience: experienceData })
+      );
       setEditIndex(null);
     } else {
       dispatch(addExperience(experienceData));
@@ -131,10 +143,7 @@ const ExperienceForm: React.FC = () => {
               />
             </AccordionContent>
             <AccordionContent className="mb-4">
-              <Checkbox
-                {...register("currentlyWorkHere")}
-                color="primary"
-              >
+              <Checkbox {...register("currentlyWorkHere")} color="primary">
                 I currently work here
               </Checkbox>
             </AccordionContent>
@@ -159,16 +168,34 @@ const ExperienceForm: React.FC = () => {
               )}
             </AccordionContent>
           </form>
-
-          {experience.map((exp, index) => (
-            <ExperienceItem
-              key={index}
-              exp={exp}
-              index={index}
-              onEdit={handleEdit}
-              onRemove={handleRemove}
-            />
-          ))}
+          <AnimatePresence>
+            {experience.map((exp, index) => (
+              <motion.div
+                key={exp.company + exp.startDate}
+                layout
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -50 }}
+                transition={{ duration: 0.3 }}
+              >
+                <ExperienceItem
+                  exp={exp}
+                  index={index}
+                  isFirst={index === 0}
+                  isLast={index === experience.length - 1}
+                  onEdit={(updatedExp) =>
+                    dispatch(
+                      updateExperience({ index, experience: updatedExp })
+                    )
+                  }
+                  onRemove={() => dispatch(removeExperience(index))}
+                  onReorder={(direction) =>
+                    dispatch(reorderExperience({ index, direction }))
+                  }
+                />
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </AccordionItem>
       </Accordion>
     </div>
@@ -178,11 +205,22 @@ const ExperienceForm: React.FC = () => {
 interface ExperienceItemProps {
   exp: CVState["experience"][0];
   index: number;
-  onEdit: (index: number) => void;
-  onRemove: (index: number) => void;
+  isFirst: boolean;
+  isLast: boolean;
+  onEdit: (updatedExp: CVState["experience"][0]) => void;
+  onRemove: () => void;
+  onReorder: (direction: "up" | "down") => void;
 }
 
-const ExperienceItem: React.FC<ExperienceItemProps> = ({ exp, index, onEdit, onRemove }) => {
+const ExperienceItem: React.FC<ExperienceItemProps> = ({
+  exp,
+  index,
+  onEdit,
+  onRemove,
+  isFirst,
+  isLast,
+  onReorder,
+}) => {
   const [isEditing, setIsEditing] = useState(false);
   const dispatch = useDispatch();
 
@@ -201,7 +239,9 @@ const ExperienceItem: React.FC<ExperienceItemProps> = ({ exp, index, onEdit, onR
 
   const currentlyWorkHere = watch("currentlyWorkHere");
 
-  const onSubmit = (data: CVState["experience"][0] & { currentlyWorkHere: boolean }) => {
+  const onSubmit = (
+    data: CVState["experience"][0] & { currentlyWorkHere: boolean }
+  ) => {
     const { currentlyWorkHere, ...experienceData } = data;
     if (currentlyWorkHere) {
       experienceData.endDate = "Present";
@@ -249,10 +289,7 @@ const ExperienceItem: React.FC<ExperienceItemProps> = ({ exp, index, onEdit, onR
             errorMessage={errors.endDate?.message}
             isDisabled={currentlyWorkHere}
           />
-          <Checkbox
-            {...register("currentlyWorkHere")}
-            color="primary"
-          >
+          <Checkbox {...register("currentlyWorkHere")} color="primary">
             I currently work here
           </Checkbox>
           <Textarea
@@ -266,25 +303,59 @@ const ExperienceItem: React.FC<ExperienceItemProps> = ({ exp, index, onEdit, onR
           <Button type="submit" color="primary" className="mt-2 mr-2">
             Save
           </Button>
-          <Button onClick={() => setIsEditing(false)} color="secondary" className="mt-2">
+          <Button
+            onClick={() => setIsEditing(false)}
+            color="secondary"
+            className="mt-2"
+          >
             Cancel
           </Button>
         </form>
       ) : (
         <>
-          <p><strong>Company:</strong> {exp.company}</p>
-          <p><strong>Position:</strong> {exp.position}</p>
-          <p><strong>Start Date:</strong> {exp.startDate}</p>
-          <p><strong>End Date:</strong> {exp.endDate}</p>
-          <p><strong>Description:</strong> {exp.description}</p>
-          <Button onClick={() => setIsEditing(true)} color="primary" className="mt-2 mr-2">
+          <p>
+            <strong>Company:</strong> {exp.company}
+          </p>
+          <p>
+            <strong>Position:</strong> {exp.position}
+          </p>
+          <p>
+            <strong>Start Date:</strong> {exp.startDate}
+          </p>
+          <p>
+            <strong>End Date:</strong> {exp.endDate}
+          </p>
+          <p>
+            <strong>Description:</strong> {exp.description}
+          </p>
+          <Button
+            onClick={() => setIsEditing(true)}
+            color="primary"
+            className="mt-2 mr-2"
+          >
             Edit
           </Button>
-          <Button onClick={() => onRemove(index)} color="danger" className="mt-2">
+          <Button onClick={onRemove} color="danger" className="mt-2">
             Remove
           </Button>
         </>
       )}
+      <Button
+        onClick={() => onReorder("up")}
+        color="secondary"
+        className="mt-2 mr-2"
+        isDisabled={isFirst}
+      >
+        <FaCaretUp /> Move Up
+      </Button>
+      <Button
+        onClick={() => onReorder("down")}
+        color="secondary"
+        className="mt-2"
+        isDisabled={isLast}
+      >
+        <FaCaretDown /> Move Down
+      </Button>
     </div>
   );
 };
