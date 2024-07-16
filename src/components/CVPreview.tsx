@@ -94,7 +94,7 @@ const CVPreview: React.FC = () => {
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
 
-      const scale = 2; // Increase scale for better quality
+      const scale = 5; // Increase scale for better quality
       const elementWidth = element.offsetWidth;
       const elementHeight = element.offsetHeight;
 
