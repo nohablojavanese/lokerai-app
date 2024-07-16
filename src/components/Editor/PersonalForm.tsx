@@ -192,7 +192,7 @@ const PersonalInfoForm: React.FC = () => {
           )}
         />
       </div>
-      <div className=" relative">
+      <div className=" relative Z-0">
         <Controller
           name="ringkasan"
           control={control}
@@ -215,7 +215,7 @@ const PersonalInfoForm: React.FC = () => {
           disabled={wordCount < 20}
         />
       </div>
-      {error && <p className="text-red-500 text-xs font-bold">{error}
+      {/* {error && <p className="text-red-500 text-xs font-bold">{error}
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalContent>
           <ModalHeader>Penggunaan AI Mencapai Batas</ModalHeader>
@@ -228,7 +228,7 @@ const PersonalInfoForm: React.FC = () => {
         </ModalContent>
       </Modal>
       </p>
-      }
+      } */}
     </form>
   );
 };
