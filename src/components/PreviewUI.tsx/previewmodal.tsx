@@ -10,7 +10,7 @@ const PDFPreviewModal: React.FC<PDFPreviewModalProps> = ({ show, pdfBlobUrl, onC
     if (!show || !pdfBlobUrl) return null;
   
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-40">
         <div className="bg-white p-4 rounded-lg w-full h-full max-w-5xl max-h-[90vh] flex flex-col">
           <h2 className="text-2xl mb-4">PDF Preview</h2>
           <iframe
