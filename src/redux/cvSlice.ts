@@ -12,11 +12,12 @@ export interface CVState {
     alamat:string;
     email: string;
     phone: string;
+    ringkasan: string;
   };
   education: {
     school: string;
     degree: string;
-    graduationYear: string;
+    graduationYear: number;
   }[];
   experience: {
     company: string;
@@ -24,6 +25,8 @@ export interface CVState {
     startDate: string;
     endDate: string;
     description: string;
+    // currentlyWorkHere: boolean;
+
   }[];
   skills: string[];
 }
@@ -40,6 +43,7 @@ const initialState: CVState = {
     alamat: 'Jln. Jalan JK 9AK',
     email: 'email@contoh.com',
     phone: "0821xxxxxxxx",
+    ringkasan: '',
   },
   education: [],
   experience: [],
