@@ -1,5 +1,20 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
+export interface LinkedInProfile {
+  fullName: string;
+  headline: string;
+  location: string;
+  summary: string;
+  experiences: Array<{
+    title: string;
+    company: string;
+    dateRange: string;
+    description: string;
+  }>;
+  // Add other relevant fields as needed
+}
+
+
 export interface CVState {
   fontSettings: {
     headerFont: string;
@@ -28,9 +43,11 @@ export interface CVState {
     // currentlyWorkHere: boolean;
   }[];
   skills: string[];
+  linkedInProfile: LinkedInProfile | null;
+
 }
 
-const initialState: CVState = {
+export const initialState: CVState = {
   fontSettings: {
     headerFont: "Arial",
     bodyFont: "Helvetica",
@@ -47,18 +64,19 @@ const initialState: CVState = {
   education: [],
   experience: [],
   skills: [],
+  linkedInProfile: null,
 };
 
 const cvSlice = createSlice({
   name: "cv",
   initialState,
   reducers: {
-    updatePersonalInfo: (
-      state,
-      action: PayloadAction<Partial<CVState["personalInfo"]>>
-    ) => {
-      state.personalInfo = { ...state.personalInfo, ...action.payload };
-    },
+    // updatePersonalInfo: (
+    //   state,
+    //   action: PayloadAction<Partial<CVState["personalInfo"]>>
+    // ) => {
+    //   state.personalInfo = { ...state.personalInfo, ...action.payload };
+    // },
     addEducation: (state, action: PayloadAction<CVState["education"][0]>) => {
       state.education.push(action.payload);
     },
@@ -140,8 +158,19 @@ const cvSlice = createSlice({
         ];
       }
     },
+    setLinkedInProfile: (state, action: PayloadAction<LinkedInProfile>) => {
+      state.linkedInProfile = action.payload;
+    },
+    updatePersonalInfo: (
+      state,
+      action: PayloadAction<Partial<CVState["personalInfo"]>>
+    ) => {
+      state.personalInfo = { ...state.personalInfo, ...action.payload };
+    },
   },
+  
 });
+export const { setLinkedInProfile } = cvSlice.actions;
 
 export const {
   updatePersonalInfo,
