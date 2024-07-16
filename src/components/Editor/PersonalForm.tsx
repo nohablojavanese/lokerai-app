@@ -10,6 +10,15 @@ import { HiSparkles } from "react-icons/hi";
 import AIButton from "../ui/aisparkle";
 import { rewriteSummary } from "@/app/action";
 import { readStreamableValue } from "ai/rsc";
+import { Button } from "@nextui-org/button";
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  useDisclosure,
+} from "@nextui-org/modal";
 
 const personalInfoSchema = yup.object().shape({
   name: yup
@@ -34,6 +43,9 @@ const PersonalInfoForm: React.FC = () => {
   const personalInfo = useSelector((state: RootState) => state.cv.personalInfo);
   const [wordCount, setWordCount] = useState(0);
   const [isAILoading, setIsAILoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
   const {
     control,
     formState: { errors },
@@ -65,16 +77,32 @@ const PersonalInfoForm: React.FC = () => {
 
   const handleAIRewrite = async () => {
     setIsAILoading(true);
+    setError(null);
     try {
       const { output } = await rewriteSummary(ringkasanValue);
       let rewrittenSummary = "";
 
       for await (const delta of readStreamableValue(output)) {
-        rewrittenSummary += delta;
-        setValue("ringkasan", rewrittenSummary);
+        if (delta) {
+          if (typeof delta === "string") {
+            rewrittenSummary += delta;
+            setValue("ringkasan", rewrittenSummary);
+          } else if ("error" in delta) {
+            throw new Error("An unexpected error occurred");
+          }
+        }
       }
     } catch (error) {
       console.error("Error rewriting summary:", error);
+      setError(
+        error instanceof Error ? error.message : "An unexpected error occurred"
+      );
+      if (
+        error instanceof Error &&
+        error.message.includes("API rate limit exceeded")
+      ) {
+        onOpen();
+      }
     } finally {
       setIsAILoading(false);
     }
@@ -164,7 +192,7 @@ const PersonalInfoForm: React.FC = () => {
           )}
         />
       </div>
-      <div className="mb-4 relative">
+      <div className=" relative">
         <Controller
           name="ringkasan"
           control={control}
@@ -176,13 +204,31 @@ const PersonalInfoForm: React.FC = () => {
               labelPlacement="outside"
               isInvalid={!!errors.ringkasan}
               errorMessage={errors.ringkasan?.message}
-              description={`Kolom ini berisi ${wordCount} kata`}
+              description={`Kolom ini berisi ${wordCount} kata${20 - wordCount > 0 ? `, tambah ${20 - wordCount} kata untuk gunakan AI` : ''}`}
               className="z-0"
             />
           )}
         />
-        <AIButton onClick={handleAIRewrite} isLoading={isAILoading} />
+        <AIButton
+          onClick={handleAIRewrite}
+          isLoading={isAILoading}
+          disabled={wordCount < 20}
+        />
       </div>
+      {error && <p className="text-red-500 text-xs font-bold">{error}
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalContent>
+          <ModalHeader>Penggunaan AI Mencapai Batas</ModalHeader>
+          <ModalBody>
+            Saya masih Nombok, Jangan Boros-Boros pakai nya ya!
+          </ModalBody>
+          <ModalFooter>
+            <Button onClick={onClose}>Close</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+      </p>
+      }
     </form>
   );
 };
