@@ -99,7 +99,7 @@ const LinkedInProfileForm: React.FC = () => {
   };
 
   const handleClearState = () => {
-    dispatch(hydrate(initialState)); // Assuming you have an initialState defined in your cvSlice
+    dispatch(hydrate(initialState)); 
   };
 
   return (
