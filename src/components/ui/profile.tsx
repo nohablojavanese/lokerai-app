@@ -11,6 +11,7 @@ import {
   hydrate,
   initialState,
 } from "../../redux/cvSlice";
+import { blockedUsernames } from "@/lib/blockedusername";
 
 const LinkedInProfileForm: React.FC = () => {
   const [url, setUrl] = useState("");
@@ -18,12 +19,19 @@ const LinkedInProfileForm: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const dispatch = useDispatch();
 
+  const isBlockedUrl = (url: string) => {
+    return blockedUsernames.some((username) => url.includes(username));
+  };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!url.startsWith("https://www.linkedin.com/in")) {
       setError(
         "Mohon masukan Link yang benar `https://www.linkedin.com/in/(username_kamu)"
       );
+      return;
+    }
+    if (isBlockedUrl(url)) {
+      setError("This LinkedIn profile is not allowed. Please use another URL. You try to dox me or what!?");
       return;
     }
 
