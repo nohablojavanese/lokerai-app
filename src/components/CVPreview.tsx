@@ -1,4 +1,4 @@
-import React, { useState, lazy, Suspense } from "react";
+import React, { useState, lazy, Suspense, useRef, useCallback } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/store";
 import { jsPDF } from "jspdf";
@@ -8,6 +8,7 @@ import { CVState } from "@/types";
 // import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import PreviewControls from "./PreviewUI.tsx/zoom";
 import PDFPreviewModal from "./PreviewUI.tsx/previewmodal";
+import Image from "next/image";
 
 const ATSTemplate = lazy(() => import("./Preview/ATSTemplate"));
 const StylizedTemplate = lazy(() => import("./Preview/StylizedTemplate"));
@@ -54,6 +55,7 @@ const CVPreview: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [pdfBlobUrl, setPdfBlobUrl] = useState<string | null>(null);
   const [zoom, setZoom] = useState(100);
+  const previewRef = useRef<HTMLDivElement>(null);
 
   const handleZoomIn = () => setZoom((prev) => Math.min(prev + 10, 200));
   const handleZoomOut = () => setZoom((prev) => Math.max(prev - 10, 50));
@@ -76,17 +78,12 @@ const CVPreview: React.FC = () => {
     }));
   };
 
-  const generatePDF = async (): Promise<jsPDF | null> => {
+  const generatePDF = useCallback(async (): Promise<string | null> => {
+    if (!previewRef.current) return null;
     setIsGenerating(true);
     setError(null);
-    const element = document.getElementById("cv-preview");
-    if (!element) {
-      setError("CV preview element not found");
-      setIsGenerating(false);
-      return null;
-    }
-
     try {
+      const element = previewRef.current;
       const pdf = new jsPDF({
         unit: "mm",
         format: pdfOptions.format,
@@ -95,69 +92,80 @@ const CVPreview: React.FC = () => {
 
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
+      const margin = 0;
 
-      const scale = 5; // Increase scale for better quality
-      const elementWidth = element.offsetWidth;
-      const elementHeight = element.offsetHeight;
+      const scale = 2;
+      const elementWidth = element.scrollWidth;
+      const elementHeight = element.scrollHeight;
 
       const canvas = await html2canvas(element, {
         scale: scale,
         width: elementWidth,
         height: elementHeight,
         useCORS: true,
+        logging: false,
+        windowWidth: elementWidth,
+        windowHeight: elementHeight,
       });
 
       const imgData = canvas.toDataURL("image/png");
+      const imgWidth = pageWidth - 2;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-      // Calculate the scaling factor to fit the entire content
-      const scaleFactor = Math.min(
-        pageWidth / elementWidth,
-        pageHeight / elementHeight
-      );
+      let heightLeft = imgHeight;
+      let position = 0;
+      let pageCount = 0;
 
-      const xOffset = (pageWidth - elementWidth * scaleFactor) / 2;
-      const yOffset = (pageHeight - elementHeight * scaleFactor) / 2;
+      while (heightLeft > 0) {
+        pdf.addImage(imgData, "PNG", margin, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight - 2;
+        position -= pageHeight;
+        pageCount++;
 
-      pdf.addImage(
-        imgData,
-        "PNG",
-        xOffset,
-        yOffset,
-        elementWidth * scaleFactor,
-        elementHeight * scaleFactor
-      );
+        if (heightLeft > 0) {
+          pdf.addPage();
+        }
+      }
 
       if (pdfOptions.addPageNumbers) {
-        pdf.setFontSize(10);
-        pdf.text(`Page 1`, pageWidth / 2, pageHeight - 5, { align: "center" });
+        for (let i = 1; i <= pageCount; i++) {
+          pdf.setPage(i);
+          pdf.setFontSize(10);
+          pdf.text(`Page ${i} of ${pageCount}`, pageWidth / 2, pageHeight - 5, {
+            align: "center",
+          });
+        }
       }
 
       setIsGenerating(false);
-      return pdf;
+
+      const pdfBlob = pdf.output("blob");
+      console.log("Number of pages in PDF:", pageCount);
+      return URL.createObjectURL(pdfBlob);
     } catch (err) {
       console.error("Error generating PDF:", err);
       setError("Failed to generate PDF. Please try again.");
       setIsGenerating(false);
       return null;
     }
-  };
+  }, [pdfOptions, setIsGenerating, setError]);
 
   const handlePreviewPDF = async () => {
-    const pdf = await generatePDF();
-    console.log("Generating PDF", pdf);
-    if (pdf) {
-      const pdfBlob = pdf.output("blob");
-      const blobUrl = URL.createObjectURL(pdfBlob);
-      console.log("PDF Blob URL:", blobUrl);
-      setPdfBlobUrl(blobUrl);
+    const pdfBlobUrl = await generatePDF();
+    if (pdfBlobUrl) {
+      setPdfBlobUrl(pdfBlobUrl);
       setShowPreview(true);
     }
   };
 
   const handleDownloadPDF = async () => {
-    const pdf = await generatePDF();
-    if (pdf) {
-      pdf.save(`${cv.personalInfo.name}_TawaKarir_CV.pdf`);
+    const pdfBlobUrl = await generatePDF();
+    if (pdfBlobUrl) {
+      const link = document.createElement("a");
+      link.href = pdfBlobUrl;
+      link.download = `${cv.personalInfo.name}_TawaKarir_CV.pdf`;
+      link.click();
+      URL.revokeObjectURL(pdfBlobUrl);
     }
   };
 
@@ -165,25 +173,27 @@ const CVPreview: React.FC = () => {
 
   return (
     <div className="w-full h-full max-w-3xl mx-auto z-10">
-       <PreviewControls
-            zoom={zoom}
-            onZoomIn={handleZoomIn}
-            onZoomOut={handleZoomOut}
-            showSidebar={showSidebar}
-            onToggleSidebar={() => setShowSidebar(!showSidebar)}
-            onPreviewPDF={handlePreviewPDF}
-            onDownloadPDF={handleDownloadPDF}
-            isGenerating={isGenerating}
-            
-          />
+      <PreviewControls
+        zoom={zoom}
+        onZoomIn={handleZoomIn}
+        onZoomOut={handleZoomOut}
+        showSidebar={showSidebar}
+        onToggleSidebar={() => setShowSidebar(!showSidebar)}
+        onPreviewPDF={handlePreviewPDF}
+        onDownloadPDF={handleDownloadPDF}
+        isGenerating={isGenerating}
+      />
       <div className="relative w-full pb-[141.4%] ">
         <div
-          className="absolute inset-0 bg-red-100 shadow-xl text-black overflow-hidden"
+          className="absolute inset-0 bg-white shadow-xl text-black overflow-hidden"
           style={{ transform: `scale(${zoom / 100})` }}
           id="cv-preview"
+          ref={previewRef}
         >
           <div
-            className="w-full h-full overflow-auto bg-white"
+            // ref={previewRef}
+            // id="cv-preview"
+            className="w-full h-full bg-white overflow-hidden"
             style={{
               transform: `scale(${zoom / 100})`,
               transformOrigin: "center",
@@ -194,34 +204,39 @@ const CVPreview: React.FC = () => {
               <SelectedTemplate cv={cv} />
             </Suspense>
           </div>
-          <p className="absolute text-xs text-gray-200 right-10 bottom-10">LokerAI.com</p>
-      </div>
+          <p className="absolute text-xs text-gray-200 right-2 bottom-0">
+            LokerAI.com
+          </p>
+        </div>
 
-          <div
-            className={`fixed z-40 left-0 top-0 h-full w-1/2 bg-gray-100 dark:bg-gray-900 p-4 overflow-y-auto transition-transform duration-300 ease-in-out drop-shadow-xl ${
-              showSidebar ? "translate-x-0" : "-translate-x-full"
-            }`}
-          >
-            <CVSidebar
-              templates={Object.keys(templates)}
-              selectedTemplate={selectedTemplate}
-              pdfOptions={pdfOptions}
-              onTemplateChange={handleTemplateChange}
-              onPdfOptionChange={handlePdfOptionChange}
-            />
-          </div>
-          <PDFPreviewModal
-            show={showPreview}
-            pdfBlobUrl={pdfBlobUrl}
-            onClose={() => {
-              setShowPreview(false);
-              if (pdfBlobUrl) {
-                URL.revokeObjectURL(pdfBlobUrl);
-              }
-              setPdfBlobUrl(null);
-            }}
+        <div
+          className={`fixed z-40 left-0 top-0 h-full w-1/2 bg-gray-100 dark:bg-gray-900 p-4 overflow-y-auto transition-transform duration-300 ease-in-out drop-shadow-xl ${
+            showSidebar ? "translate-x-0" : "-translate-x-full"
+          }`}
+        >
+          <CVSidebar
+            templates={Object.keys(templates)}
+            selectedTemplate={selectedTemplate}
+            pdfOptions={pdfOptions}
+            onTemplateChange={handleTemplateChange}
+            onPdfOptionChange={handlePdfOptionChange}
           />
         </div>
+
+        <PDFPreviewModal
+          onDownloadPDF={handleDownloadPDF}
+          isGenerating={isGenerating}
+          show={showPreview}
+          pdfBlobUrl={pdfBlobUrl}
+          onClose={() => {
+            setShowPreview(false);
+            if (pdfBlobUrl) {
+              URL.revokeObjectURL(pdfBlobUrl);
+            }
+            setPdfBlobUrl(null);
+          }}
+        />
+      </div>
     </div>
   );
 };
