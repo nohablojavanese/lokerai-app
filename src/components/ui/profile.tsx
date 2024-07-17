@@ -59,7 +59,7 @@ const LinkedInProfileForm: React.FC = () => {
       // Update personal info
       dispatch(
         updatePersonalInfo({
-          name: data.first_name,
+          name: data.first_name ,
           last: data.last_name,
           email: data.email || "",
           phone: data.phone || "",
@@ -126,11 +126,11 @@ const LinkedInProfileForm: React.FC = () => {
       {isLoading && (
         <Progress isIndeterminate color="primary" className="mt-2" />
       )}
-      <div className="flex justify-between mt-4">
-        <Button type="submit" disabled={isLoading}>
+      <div className="flex text-xs md:text-md justify-between mt-2 md:mt-4">
+        <Button className="text-xs md:text-base" type="submit" disabled={isLoading}>
           {isLoading ? "Loading..." : "Import LinkedIn Profile"}
         </Button>
-        <Button onClick={handleClearState} color="secondary">
+        <Button className="text-xs md:text-base" onClick={handleClearState} color="secondary">
           Clear All Data
         </Button>
       </div>

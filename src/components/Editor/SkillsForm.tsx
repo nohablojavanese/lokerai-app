@@ -28,27 +28,27 @@ const SkillsForm: React.FC = () => {
 
   return (
     <div>
-      <div className="flex mb-4">
+      <div className="flex mb-2 md:mb-4">
         <input
           type="text"
           value={newSkill}
           onChange={(e) => setNewSkill(e.target.value)}
-          className="flex-grow p-2 border rounded-l"
+          className="flex flex-auto  p-2 border rounded-l"
           placeholder="Enter a skill"
         />
         <button
           onClick={onAddSkill}
-          className="bg-blue-500 text-white px-4 py-2 rounded-r"
+          className="bg-blue-500 text-white px-4 py-2 rounded-r "
         >
           Add Skill
         </button>
       </div>
 
       <div className="mt-6">
-        <h3 className="text-xl font-semibold mb-4">Added Skills</h3>
-        <div className="flex flex-wrap">
+        {/* <h3 className="text-xl font-semibold mb-4">Added Skills</h3> */}
+        <div className="flex flex-wrap my-4">
           {skills.map((skill, index) => (
-            <div key={index} className="m-2 p-2 bg-gray-200 rounded flex items-center">
+            <div key={index} className="m-2 p-2 text-sm md:text-base bg-gray-200 rounded flex items-center">
               <span>{skill}</span>
               <button
                 onClick={() => handleRemove(index)}

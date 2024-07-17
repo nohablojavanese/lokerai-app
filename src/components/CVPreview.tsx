@@ -172,7 +172,7 @@ const CVPreview: React.FC = () => {
   const SelectedTemplate = templates[selectedTemplate];
 
   return (
-    <div className="w-full h-full max-w-3xl mx-auto z-10">
+    <div className="w-full h-full md:max-w-3xl mx-auto z-10">
       <PreviewControls
         zoom={zoom}
         onZoomIn={handleZoomIn}
@@ -187,13 +187,13 @@ const CVPreview: React.FC = () => {
         <div
           className="absolute inset-0 bg-white shadow-xl text-black overflow-hidden"
           style={{ transform: `scale(${zoom / 100})` }}
-          id="cv-preview"
-          ref={previewRef}
+          // id="cv-preview"
+          // ref={previewRef}
         >
           <div
-            // ref={previewRef}
-            // id="cv-preview"
-            className="w-full h-full bg-white overflow-hidden"
+            ref={previewRef}
+            id="cv-preview"
+            className="w-full h-full bg-white overflow-hidden text-xs md:text-base"
             style={{
               transform: `scale(${zoom / 100})`,
               transformOrigin: "center",
