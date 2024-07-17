@@ -21,7 +21,9 @@ const LinkedInProfileForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!url.startsWith("https://www.linkedin.com/in")) {
-      setError("Please enter a valid LinkedIn profile URL");
+      setError(
+        "Mohon masukan Link yang benar `https://www.linkedin.com/in/(username_kamu)"
+      );
       return;
     }
 
@@ -38,7 +40,7 @@ const LinkedInProfileForm: React.FC = () => {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to fetch LinkedIn profile");
+        throw new Error("Tidak Menemukan Profile LinkedIn");
       }
 
       const { data } = await response.json();
@@ -99,7 +101,7 @@ const LinkedInProfileForm: React.FC = () => {
   };
 
   const handleClearState = () => {
-    dispatch(hydrate(initialState)); 
+    dispatch(hydrate(initialState));
   };
 
   return (
