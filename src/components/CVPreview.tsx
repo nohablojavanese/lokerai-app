@@ -92,7 +92,7 @@ const CVPreview: React.FC = () => {
 
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
-      const margin = 0;
+      const margin = 10;
 
       const scale = 2;
       const elementWidth = element.scrollWidth;
