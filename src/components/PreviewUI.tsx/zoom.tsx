@@ -11,7 +11,6 @@ interface PreviewControlsProps {
   onDownloadPDF: () => void;
   isGenerating: boolean;
 
-  
 }
 
 const PreviewControls: React.FC<PreviewControlsProps> = ({
@@ -61,7 +60,7 @@ const PreviewControls: React.FC<PreviewControlsProps> = ({
         >
           {isGenerating ? "Generating..." : "Preview PDF"}
         </button>
-        <button
+        {/* <button
           className={`px-4 py-2 bg-gray-600 hover:bg-gray-500 text-white rounded ${
             isGenerating ? "opacity-50 cursor-not-allowed" : ""
           }`}
@@ -69,7 +68,7 @@ const PreviewControls: React.FC<PreviewControlsProps> = ({
           disabled={isGenerating}
         >
           {isGenerating ? "Generating..." : "Download PDF"}
-        </button>
+        </button> */}
       </div>
       {error && (
               <Alert variant="destructive" className="mt-4">

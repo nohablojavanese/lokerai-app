@@ -1,10 +1,21 @@
+import React, { useState } from "react";
+import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 interface PDFPreviewModalProps {
   show: boolean;
   pdfBlobUrl: string | null;
   onClose: () => void;
+  onDownloadPDF: () => void;
+  isGenerating: boolean;
 }
 
-const PDFPreviewModal: React.FC<PDFPreviewModalProps> = ({ show, pdfBlobUrl, onClose }) => {
+const PDFPreviewModal: React.FC<PDFPreviewModalProps> = ({
+  show,
+  pdfBlobUrl,
+  onClose,
+  onDownloadPDF,
+  isGenerating,
+}) => {
+  const [error, setError] = useState<string | null>(null);
   if (!show || !pdfBlobUrl) return null;
 
   return (
@@ -17,11 +28,26 @@ const PDFPreviewModal: React.FC<PDFPreviewModalProps> = ({ show, pdfBlobUrl, onC
           style={{ border: "1px solid #ccc" }}
         />
         <button
-          className="mt-4 px-4 py-2 bg-red-500 text-white rounded self-end"
+          className="mt-4 px-4 py-2 bg-red-500 text-white rounded "
           onClick={onClose}
         >
           Close Preview
         </button>
+        <button
+          className={`px-4 py-2 bg-gray-600 hover:bg-gray-500 text-white rounded ${
+            isGenerating ? "opacity-50 cursor-not-allowed" : ""
+          }`}
+          onClick={onDownloadPDF}
+          disabled={isGenerating}
+        >
+          {isGenerating ? "Generating..." : "Download PDF"}
+        </button>
+        {error && (
+          <Alert variant="destructive" className="mt-4">
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
       </div>
     </div>
   );
