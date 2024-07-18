@@ -7,27 +7,41 @@ interface ATSTemplateProps {
 }
 
 const formatDescription = (description: string) => {
-  if (description.trim().startsWith('-')) {
-    // If the description starts with a dash, treat it as a bullet list
+  const lines = description.split('\n').map(line => line.trim());
+  
+  if (lines[0].match(/^(-|\d+\.)/)) {
     return (
-      <ul className="list-disc list-outside">
-        {description.split('-').map((item, index) => (
-          item.trim() && <li className="text-left text-balance" key={index}>{item.trim()}</li>
-        ))}
+      <ul className="list-disc list-inside">
+        {lines.map((item, index) => {
+          const cleanItem = item.replace(/^(-|\d+\.)/, '').trim();
+          return cleanItem && <li key={index}>{cleanItem}</li>;
+        })}
       </ul>
     );
   } else {
-    // Otherwise, treat it as a paragraph
     return <p>{description}</p>;
   }
 };
 
-const ATSTemplate: React.FC<ATSTemplateProps> = ({ cv}) => {
+const formatDate = (dateString: string) => {
+  if (dateString === "Present") return "Present";
+  const date = new Date(dateString);
+  return date.toLocaleString('default', { month: 'long', year: 'numeric' });
+};
+
+const ATSTemplate: React.FC<ATSTemplateProps> = ({ cv, className = "" }) => {
+  const { name, last, email, phone } = cv.personalInfo;
+  const headerParts = [
+    `${name} ${last}`,
+    email,
+    phone
+  ].filter(Boolean);
+
   return (
-    <div className={`font-sans w-full h-full `}>
+ <div className={`font-sans w-full h-full ${className}`}>
       <div className="flex flex-col items-center">
         <h1 className="text-4vw font-bold text-center">
-          {cv.personalInfo.name} {cv.personalInfo.last} | {cv.personalInfo.email} | {cv.personalInfo.phone}
+          {headerParts.join(" \u2022 ")}
         </h1>
         <h2 className="text-sm text-center font-base pb-2 border-b-2 border-gray-900 inline-block outline-offset-2">
           {cv.personalInfo.ringkasan}
@@ -38,7 +52,7 @@ const ATSTemplate: React.FC<ATSTemplateProps> = ({ cv}) => {
         <div key={index} className="mb-2">
           <p className="font-semibold text-2vw">{edu.school}</p>
           <p className="text-1.5vw">
-            {edu.degree} - Graduated: {edu.graduationYear}
+            {edu.degree} - Graduated: {formatDate(edu.graduationYear)}
           </p>
         </div>
       ))}
@@ -50,9 +64,9 @@ const ATSTemplate: React.FC<ATSTemplateProps> = ({ cv}) => {
             {exp.company} - {exp.position}
           </p>
           <p className="text-1.5vw">
-            {exp.startDate} - {exp.endDate}
+            {formatDate(exp.startDate)} - {formatDate(exp.endDate)}
           </p>
-          <div className="mt-1 text-1.5vw text-pretty">
+          <div className="mt-1 text-1.5vw">
             {formatDescription(exp.description)}
           </div>
         </div>

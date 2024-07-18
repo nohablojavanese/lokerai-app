@@ -111,8 +111,8 @@ const EducationForm: React.FC = () => {
                 isRequired
                 labelPlacement="outside"
                 isInvalid={!!errors.graduationYear}
-                // errorMessage={errors.graduationYear?.message}
-                errorMessage={errors.graduationYear?.message as string}
+                errorMessage={errors.graduationYear?.message}
+                // errorMessage={errors.graduationYear?.message as string}
               />
             </AccordionContent>
             <AccordionContent>
@@ -225,7 +225,7 @@ const EducationItem: React.FC<EducationItemProps> = ({
             isRequired
             labelPlacement="outside"
             isInvalid={!!errors.graduationYear}
-            errorMessage={errors.graduationYear?.message}
+            // errorMessage={errors.graduationYear?.message}
           />
           <Button type="submit" color="primary" className="mt-2 mr-2">
             Save

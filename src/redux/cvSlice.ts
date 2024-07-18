@@ -32,7 +32,7 @@ export interface CVState {
   education: {
     school: string;
     degree: string;
-    graduationYear: number;
+    graduationYear: any;
   }[];
   experience: {
     company: string;

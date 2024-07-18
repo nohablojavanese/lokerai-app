@@ -183,7 +183,7 @@ const CVPreview: React.FC = () => {
       />
       <div id="wrapper" className="relative w-full pb-[141.4%] ">
         <div
-          className="absolute inset-0 bg-white shadow-xl text-black overflow-hidden"
+          className="absolute inset-0 bg-white shadow-xl text-black overflow-y"
           style={{ transform: `scale(${zoom / 100})` }}
           // id="cv-preview"
           // ref={previewRef}
@@ -191,7 +191,7 @@ const CVPreview: React.FC = () => {
           <div
             ref={previewRef}
             id="cv-preview"
-            className="w-full h-full bg-white overflow-y text-xs md:text-base"
+            className="w-full h-auto bg-white overflow-y text-xs md:text-base"
             style={{
               transform: `scale(${zoom / 100})`,
               transformOrigin: "center",
