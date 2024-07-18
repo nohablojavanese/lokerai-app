@@ -1,9 +1,8 @@
 import React from "react";
-import PersonalInfoForm from "./Editor/PersonalForm";
-import EducationForm from "./Editor/EducationalForm";
-import ExperienceForm from "./Editor/ExperienceForm";
+import PersonalInfoForm from "./Editor/Personal/PersonalForm";
+import EducationForm from "./Editor/Education/EducationForm";
+import ExperienceForm from "./Editor/Experience/ExperienceForm";
 import SkillsForm from "./Editor/SkillsForm";
-import { ModeToggle } from "./Provider/Theme/DarkMode";
 import LinkedInProfileForm from "./ui/profile";
 
 const CVEditor: React.FC = () => {
