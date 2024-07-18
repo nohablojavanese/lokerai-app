@@ -3,11 +3,11 @@ import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../../redux/store";
-import { updatePersonalInfo } from "../../redux/cvSlice";
+import { RootState } from "../redux/store";
+import { updatePersonalInfo } from "../redux/cvSlice";
 import { Input, Textarea } from "@nextui-org/input";
 import { HiSparkles } from "react-icons/hi";
-import AIButton from "../ui/aisparkle";
+import AIButton from "../components/ui/aisparkle";
 import { rewriteSummary } from "@/app/action";
 import { readStreamableValue } from "ai/rsc";
 import { Button } from "@nextui-org/button";
@@ -205,7 +205,11 @@ const PersonalInfoForm: React.FC = () => {
               labelPlacement="outside"
               isInvalid={!!errors.ringkasan}
               errorMessage={errors.ringkasan?.message}
-              description={`Kolom ini berisi ${wordCount} kata${20 - wordCount > 0 ? `, tambah ${20 - wordCount} kata untuk gunakan AI` : ''}`}
+              description={`Kolom ini berisi ${wordCount} kata${
+                20 - wordCount > 0
+                  ? `, tambah ${20 - wordCount} kata untuk gunakan AI`
+                  : ""
+              }`}
             />
           )}
         />
