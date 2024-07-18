@@ -1,0 +1,24 @@
+# To get started with Dependabot version updates, you'll need to specify which
+# package ecosystems to update and where the package manifests are located.
+# Please see the documentation for all configuration options:
+# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/" # Location of package.json
+    schedule:
+      interval: "weekly" # Check for updates weekly
+    commit-message:
+      prefix: "deps" # Custom prefix for the commit message
+    open-pull-requests-limit: 2 # Limit the number of open PRs to 5
+    # Specific rules for dependencies you want to update
+    allow:
+      - dependency-name: "@ai-sdk/openai"
+      - dependency-name: "ai"
+      - dependency-name: "framer-motion"
+      - dependency-name: "tailwind-merge"
+      - dependency-name: "tailwindcss-animate"
+      - dependency-name: "next"
+      - dependency-name: "next-themes"
+      - dependency-name: "openai"
