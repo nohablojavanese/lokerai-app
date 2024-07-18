@@ -5,7 +5,6 @@ import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 import CVSidebar from "./Preview/Sidebar/Sidebar";
 import { CVState } from "@/types";
-// import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import PreviewControls from "./PreviewUI.tsx/zoom";
 import PDFPreviewModal from "./PreviewUI.tsx/previewmodal";
 import Image from "next/image";
@@ -50,7 +49,6 @@ const CVPreview: React.FC = () => {
   });
   const [showSidebar, setShowSidebar] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
-  // const [pdfDataUrl, setPdfDataUrl] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pdfBlobUrl, setPdfBlobUrl] = useState<string | null>(null);
@@ -183,17 +181,17 @@ const CVPreview: React.FC = () => {
         onDownloadPDF={handleDownloadPDF}
         isGenerating={isGenerating}
       />
-      <div className="relative w-full pb-[141.4%] ">
+      <div id="wrapper" className="relative w-full pb-[141.4%] ">
         <div
-          className="absolute inset-0 bg-white shadow-xl text-black overflow-hidden"
+          className="absolute inset-0 bg-white shadow-xl text-black overflow-auto"
           style={{ transform: `scale(${zoom / 100})` }}
           id="cv-preview"
           ref={previewRef}
         >
           <div
             // ref={previewRef}
-            // id="cv-preview"
-            className="w-full h-full bg-white overflow-hidden"
+            id="canvas-container"
+            className="w-full h-full bg-white overflow-auto"
             style={{
               transform: `scale(${zoom / 100})`,
               transformOrigin: "center",
