@@ -9,8 +9,8 @@ import {
   updateExperience,
   reorderExperience,
   CVState,
-} from "../../redux/cvSlice";
-import { RootState } from "../../redux/store";
+} from "../redux/cvSlice";
+import { RootState } from "../redux/store";
 import {
   Accordion,
   AccordionContent,

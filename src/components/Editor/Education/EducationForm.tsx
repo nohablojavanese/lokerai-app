@@ -1,16 +1,16 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
 import { useDispatch, useSelector } from "react-redux";
 import {
   addEducation,
   removeEducation,
   updateEducation,
   reorderEducation,
-  CVState,
-} from "../../redux/cvSlice";
-import { RootState } from "../../redux/store";
+  CVState
+
+} from "@/redux/cvSlice";
+import { RootState } from "@/redux/store";
 import {
   Accordion,
   AccordionContent,
@@ -19,19 +19,9 @@ import {
 } from "@/components/ui/accordion";
 import { Input } from "@nextui-org/input";
 import { Button } from "@nextui-org/button";
-import { FaCaretDown, FaCaretUp } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
-
-const educationSchema = yup.object().shape({
-  school: yup.string().required("School is required"),
-  degree: yup.string().required("Degree is required"),
-  graduationYear: yup
-    .number()
-    .typeError("Graduation year must be a number")
-    .required("Graduation year is required")
-    .min(1945, "")
-    .max(2040, "Format Tahun Salah"),
-});
+import { educationSchema } from "./EducationTools";
+import EducationItem from "./EducationItem";
 
 const EducationForm: React.FC = () => {
   const dispatch = useDispatch();
@@ -56,10 +46,6 @@ const EducationForm: React.FC = () => {
       dispatch(addEducation(data));
     }
     reset();
-  };
-
-  const handleRemove = (index: number) => {
-    dispatch(removeEducation(index));
   };
 
   const handleEdit = (index: number) => {
@@ -111,8 +97,7 @@ const EducationForm: React.FC = () => {
                 isRequired
                 labelPlacement="outside"
                 isInvalid={!!errors.graduationYear}
-                // errorMessage={errors.graduationYear?.message}
-                errorMessage={errors.graduationYear?.message as string}
+                errorMessage={errors.graduationYear?.message}
               />
             </AccordionContent>
             <AccordionContent>
@@ -159,124 +144,6 @@ const EducationForm: React.FC = () => {
           </AccordionContent>
         </AccordionItem>
       </Accordion>
-    </div>
-  );
-};
-
-interface EducationItemProps {
-  edu: CVState["education"][0];
-  index: number;
-  isFirst: boolean;
-  isLast: boolean;
-  onEdit: (updatedEdu: CVState["education"][0]) => void;
-  onRemove: () => void;
-  onReorder: (direction: "up" | "down") => void;
-}
-
-const EducationItem: React.FC<EducationItemProps> = ({
-  edu,
-  index,
-  onEdit,
-  onRemove,
-  isFirst,
-  isLast,
-  onReorder,
-}) => {
-  const [isEditing, setIsEditing] = useState(false);
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({
-    resolver: yupResolver(educationSchema),
-    defaultValues: edu,
-  });
-
-  const onSubmit = (data: CVState["education"][0]) => {
-    onEdit(data);
-    setIsEditing(false);
-  };
-
-  return (
-    <div className="mb-4 p-4 border rounded bg-white">
-      {isEditing ? (
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <Input
-            {...register("school")}
-            label="School"
-            isRequired
-            labelPlacement="outside"
-            isInvalid={!!errors.school}
-            errorMessage={errors.school?.message}
-          />
-          <Input
-            {...register("degree")}
-            label="Degree"
-            isRequired
-            labelPlacement="outside"
-            isInvalid={!!errors.degree}
-            errorMessage={errors.degree?.message}
-          />
-          <Input
-            {...register("graduationYear")}
-            label="Graduation Year"
-            type="number"
-            isRequired
-            labelPlacement="outside"
-            isInvalid={!!errors.graduationYear}
-            errorMessage={errors.graduationYear?.message}
-          />
-          <Button type="submit" color="primary" className="mt-2 mr-2">
-            Save
-          </Button>
-          <Button
-            onClick={() => setIsEditing(false)}
-            color="secondary"
-            className="mt-2"
-          >
-            Cancel
-          </Button>
-        </form>
-      ) : (
-        <>
-          <p>
-            <strong>School:</strong> {edu.school}
-          </p>
-          <p>
-            <strong>Degree:</strong> {edu.degree}
-          </p>
-          <p>
-            <strong>Graduation Year:</strong> {edu.graduationYear}
-          </p>
-          <Button
-            onClick={() => setIsEditing(true)}
-            color="primary"
-            className="mt-2 mr-2"
-          >
-            Edit
-          </Button>
-          <Button onClick={onRemove} color="danger" className="mt-2 mr-2">
-            Remove
-          </Button>
-          <Button
-            onClick={() => onReorder("up")}
-            color="secondary"
-            className="mt-2 mr-2"
-            isDisabled={isFirst}
-          >
-            <FaCaretUp /> Move Up
-          </Button>
-          <Button
-            onClick={() => onReorder("down")}
-            color="secondary"
-            className="mt-2"
-            isDisabled={isLast}
-          >
-            <FaCaretDown /> Move Down
-          </Button>
-        </>
-      )}
     </div>
   );
 };
