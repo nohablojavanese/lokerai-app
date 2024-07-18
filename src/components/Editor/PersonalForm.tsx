@@ -201,11 +201,11 @@ const PersonalInfoForm: React.FC = () => {
               {...field}
               label="Summary/Ringkasan"
               isRequired
+              className="text-xs md:text-base z-0"
               labelPlacement="outside"
               isInvalid={!!errors.ringkasan}
               errorMessage={errors.ringkasan?.message}
               description={`Kolom ini berisi ${wordCount} kata${20 - wordCount > 0 ? `, tambah ${20 - wordCount} kata untuk gunakan AI` : ''}`}
-              className="z-0"
             />
           )}
         />

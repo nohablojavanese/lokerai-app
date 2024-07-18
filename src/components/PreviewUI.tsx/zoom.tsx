@@ -26,9 +26,9 @@ const PreviewControls: React.FC<PreviewControlsProps> = ({
     const [error, setError] = useState<string | null>(null);
 
   return (
-    <div className="fixed bottom-2 right-2 z-20">
+    <div className="fixed bottom-2 right-2 z-20 ">
       <div className="flex space-x-2 justify-center mt-4 buttom-0 text-xs md:text-md">
-        <div className="mt-4 flex justify-center items-center">
+        <div className="mt-4 justify-center items-center hidden md:flex">
           <button
             onClick={onZoomOut}
             className="px-2 py-1 bg-gray-200 rounded"
@@ -44,7 +44,7 @@ const PreviewControls: React.FC<PreviewControlsProps> = ({
           </button>
         </div>
         <button
-          className={`px-4 py-2 bg-gray-600 hover:bg-blue-600 text-white rounded ${
+          className={`px-4 py-2 bg-gray-600 hover:bg-blue-600 text-white rounded hidden md:block${
             isGenerating ? "opacity-50 cursor-not-allowed" : ""
           }`}
           onClick={onToggleSidebar}
