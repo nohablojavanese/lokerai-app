@@ -22,7 +22,7 @@ const PDFPreviewModal: React.FC<PDFPreviewModalProps> = ({
         <h2 className="text-2xl mb-4">PDF Preview</h2>
         <div className="flex-grow w-full h-full flex items-center justify-center bg-gray-100 border border-gray-300 rounded">
           <p className="text-lg text-gray-600">
-            PDF preview is not available. Click the download button to generate and save the PDF.
+            PDF preview belum tersedia. Click tombol Download untuk mengunduh hasil.
           </p>
         </div>
         <div className="mt-4 flex justify-between">
