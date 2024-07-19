@@ -1,13 +1,11 @@
-import React, { useState, lazy, Suspense, useRef, useCallback } from "react";
+import React, { useState, lazy, Suspense, useRef } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/store";
-import { jsPDF } from "jspdf";
-import html2canvas from "html2canvas";
-import CVSidebar from "./Preview/Sidebar/Sidebar";
+import { usePDF } from "react-to-pdf";
 import { CVState } from "@/types";
 import PreviewControls from "./PreviewUI.tsx/zoom";
 import PDFPreviewModal from "./PreviewUI.tsx/previewmodal";
-import Image from "next/image";
+import CVSidebar from "./Preview/Sidebar/Sidebar";
 
 const ATSTemplate = lazy(() => import("./Preview/ATSTemplate"));
 const StylizedTemplate = lazy(() => import("./Preview/StylizedTemplate"));
@@ -49,11 +47,23 @@ const CVPreview: React.FC = () => {
   });
   const [showSidebar, setShowSidebar] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [pdfBlobUrl, setPdfBlobUrl] = useState<string | null>(null);
   const [zoom, setZoom] = useState(100);
   const previewRef = useRef<HTMLDivElement>(null);
+
+  const { toPDF, targetRef } = usePDF({
+    filename: `${cv.personalInfo.name}_TawaKarir_CV.pdf`,
+    page: {
+      format: pdfOptions.format as any,
+      orientation: pdfOptions.orientation,
+      margin: {
+        top: pdfOptions.marginTop,
+        bottom: pdfOptions.marginBottom,
+        left: pdfOptions.marginLeft,
+        right: pdfOptions.marginRight,
+      },
+    },
+    method: "save",
+  });
 
   const handleZoomIn = () => setZoom((prev) => Math.min(prev + 10, 200));
   const handleZoomOut = () => setZoom((prev) => Math.max(prev - 10, 50));
@@ -76,95 +86,12 @@ const CVPreview: React.FC = () => {
     }));
   };
 
-  const generatePDF = useCallback(async (): Promise<string | null> => {
-    if (!previewRef.current) return null;
-    setIsGenerating(true);
-    setError(null);
-    try {
-      const element = previewRef.current;
-      const pdf = new jsPDF({
-        unit: "mm",
-        format: pdfOptions.format,
-        orientation: pdfOptions.orientation,
-      });
-
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      const margin = 10;
-
-      const scale = 2;
-      const elementWidth = element.scrollWidth;
-      const elementHeight = element.scrollHeight;
-
-      const canvas = await html2canvas(element, {
-        scale: scale,
-        width: elementWidth,
-        height: elementHeight,
-        useCORS: true,
-        logging: false,
-        windowWidth: elementWidth,
-        windowHeight: elementHeight,
-      });
-
-      const imgData = canvas.toDataURL("image/png");
-      const imgWidth = pageWidth - 2;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-      let heightLeft = imgHeight;
-      let position = 0;
-      let pageCount = 0;
-
-      while (heightLeft > 0) {
-        pdf.addImage(imgData, "PNG", margin, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight - 2;
-        position -= pageHeight;
-        pageCount++;
-
-        if (heightLeft > 0) {
-          pdf.addPage();
-        }
-      }
-
-      if (pdfOptions.addPageNumbers) {
-        for (let i = 1; i <= pageCount; i++) {
-          pdf.setPage(i);
-          pdf.setFontSize(10);
-          pdf.text(`Page ${i} of ${pageCount}`, pageWidth / 2, pageHeight - 5, {
-            align: "center",
-          });
-        }
-      }
-
-      setIsGenerating(false);
-
-      const pdfBlob = pdf.output("blob");
-      console.log("Number of pages in PDF:", pageCount);
-      return URL.createObjectURL(pdfBlob);
-    } catch (err) {
-      console.error("Error generating PDF:", err);
-      setError("Failed to generate PDF. Please try again.");
-      setIsGenerating(false);
-      return null;
-    }
-  }, [pdfOptions, setIsGenerating, setError]);
-
-  const handlePreviewPDF = async () => {
-    const pdfBlobUrl = await generatePDF();
-    if (pdfBlobUrl) {
-      setPdfBlobUrl(pdfBlobUrl);
-      setShowPreview(true);
-    }
+  const handlePreviewPDF = () => {
+    setShowPreview(true);
   };
 
-  const handleDownloadPDF = async () => {
-    const pdfBlobUrl = await generatePDF();
-    if (pdfBlobUrl) {
-      const link = document.createElement("a");
-      link.href = pdfBlobUrl;
-      link.download = `${cv.personalInfo.name}_TawaKarir_CV.pdf`;
-      link.click();
-      URL.revokeObjectURL(pdfBlobUrl);
-    }
+  const handleDownloadPDF = () => {
+    toPDF();
   };
 
   const SelectedTemplate = templates[selectedTemplate];
@@ -179,28 +106,26 @@ const CVPreview: React.FC = () => {
         onToggleSidebar={() => setShowSidebar(!showSidebar)}
         onPreviewPDF={handlePreviewPDF}
         onDownloadPDF={handleDownloadPDF}
-        isGenerating={isGenerating}
+        isGenerating={false}
       />
-      <div id="wrapper" className="relative w-full pb-[141.4%] ">
+      <div id="wrapper" className="relative w-full pb-[141.4%]">
         <div
           className="absolute inset-0 bg-white shadow-xl text-black overflow-y"
           style={{ transform: `scale(${zoom / 100})` }}
-          // id="cv-preview"
-          // ref={previewRef}
         >
           <div
-            ref={previewRef}
+            ref={targetRef}
             id="cv-preview"
-            className="w-full h-auto bg-white overflow-y text-xs md:text-base"
+            className="w-full h-auto bg-white overflow-y"
             style={{
-              transform: `scale(${zoom / 100})`,
-              transformOrigin: "center",
               padding: `${pdfOptions.marginTop}mm ${pdfOptions.marginRight}mm ${pdfOptions.marginBottom}mm ${pdfOptions.marginLeft}mm`,
             }}
           >
-            <Suspense fallback={<div>Loading template...</div>}>
-              <SelectedTemplate cv={cv} />
-            </Suspense>
+            <div className="isolate">
+              <Suspense fallback={<div>Loading template...</div>}>
+                <SelectedTemplate cv={cv} />
+              </Suspense>
+            </div>
           </div>
           <p className="absolute text-xs text-gray-200 right-2 bottom-0">
             LokerAI.com
@@ -222,17 +147,9 @@ const CVPreview: React.FC = () => {
         </div>
 
         <PDFPreviewModal
-          onDownloadPDF={handleDownloadPDF}
-          isGenerating={isGenerating}
           show={showPreview}
-          pdfBlobUrl={pdfBlobUrl}
-          onClose={() => {
-            setShowPreview(false);
-            if (pdfBlobUrl) {
-              URL.revokeObjectURL(pdfBlobUrl);
-            }
-            setPdfBlobUrl(null);
-          }}
+          onClose={() => setShowPreview(false)}
+          onDownloadPDF={handleDownloadPDF}
         />
       </div>
     </div>
