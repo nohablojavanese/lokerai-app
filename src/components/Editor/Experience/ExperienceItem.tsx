@@ -21,10 +21,11 @@ import { Button } from "@nextui-org/button";
 import { Checkbox } from "@nextui-org/checkbox";
 import { motion, AnimatePresence } from "framer-motion";
 import { experienceSchema } from "./ExperienceTools";
-// import ExperienceItem from "./ExperienceItem";
+import { useDisclosure } from "@nextui-org/modal";
 import AIButton from "@/components/ui/aisparkle";
 import { FaCaretDown, FaCaretUp } from "react-icons/fa";
-
+import { JobDescAI, rewriteSummary } from "./action";
+import { readStreamableValue } from "ai/rsc";
 interface ExperienceItemProps {
   exp: CVState["experience"][0];
   index: number;
@@ -47,11 +48,15 @@ const ExperienceItem: React.FC<ExperienceItemProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const dispatch = useDispatch();
-
+  const experience = useSelector((state: RootState) => state.cv.experience);
+  const [editIndex, setEditIndex] = useState<number | null>(null);
+  const [isAILoading, setIsAILoading] = useState(false);
+  const { isOpen, onOpen } = useDisclosure();
   const {
     register,
     handleSubmit,
     formState: { errors },
+    setValue,
     watch,
   } = useForm({
     resolver: yupResolver(experienceSchema),
@@ -62,6 +67,8 @@ const ExperienceItem: React.FC<ExperienceItemProps> = ({
   });
 
   const currentlyWorkHere = watch("currentlyWorkHere");
+  const [error, setError] = useState<string | null>(null);
+  const description = watch("description");
 
   const onSubmit = (
     data: CVState["experience"][0] & { currentlyWorkHere: boolean }
@@ -79,6 +86,43 @@ const ExperienceItem: React.FC<ExperienceItemProps> = ({
       return description;
     }
     return words.slice(0, 20).join(" ") + "...";
+  };
+  const formatDate = (dateString: string) => {
+    if (dateString === "Present") return "Present";
+    const date = new Date(dateString);
+    return date.toLocaleString("default", { month: "short", year: "2-digit" });
+  };
+  const handleAIRewrite = async () => {
+    setIsAILoading(true);
+    setError(null);
+    try {
+      const { output } = await JobDescAI(description);
+      let rewrittenSummary = "";
+
+      for await (const delta of readStreamableValue(output)) {
+        if (delta) {
+          if (typeof delta === "string") {
+            rewrittenSummary += delta;
+            setValue("description", rewrittenSummary);
+          } else if ("error" in delta) {
+            throw new Error("An unexpected error occurred");
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error rewriting summary:", error);
+      setError(
+        error instanceof Error ? error.message : "An unexpected error occurred"
+      );
+      if (
+        error instanceof Error &&
+        error.message.includes("API rate limit exceeded")
+      ) {
+        onOpen();
+      }
+    } finally {
+      setIsAILoading(false);
+    }
   };
   return (
     <div className="mb-4 p-4 border rounded bg-white">
@@ -122,14 +166,23 @@ const ExperienceItem: React.FC<ExperienceItemProps> = ({
           <Checkbox {...register("currentlyWorkHere")} color="primary">
             I currently work here
           </Checkbox>
-          <Textarea
-            {...register("description")}
-            label="Description"
-            isRequired
-            labelPlacement="outside"
-            isInvalid={!!errors.description}
-            errorMessage={errors.description?.message}
-          />
+          <div className="">
+            <Textarea
+              {...register("description")}
+              label="Description"
+              isRequired
+              labelPlacement="outside"
+              isInvalid={!!errors.description}
+              errorMessage={errors.description?.message}
+            />
+            <div className="mt-2 justify-end">
+              <AIButton
+                onClick={handleAIRewrite}
+                isLoading={isAILoading}
+                disabled={!description || description.split(/\s+/).length < 20}
+              />
+            </div>
+          </div>
           <Button type="submit" color="primary" className="mt-2 mr-2">
             Save
           </Button>
@@ -146,10 +199,11 @@ const ExperienceItem: React.FC<ExperienceItemProps> = ({
           <div className="flex items-start justify-end mb-2  text-right">
             <div>
               <p className="text-gray-500 text-sm ">
-                <strong>Start Date:</strong> {exp.startDate}
+                <strong>Start Date: </strong>{formatDate(exp.startDate)}
+
               </p>
               <p className="text-gray-500 text-sm">
-                <strong>End Date:</strong> {exp.endDate}
+                <strong>End Date: </strong>{formatDate(exp.endDate)}
               </p>
             </div>
           </div>
@@ -202,6 +256,13 @@ const ExperienceItem: React.FC<ExperienceItemProps> = ({
       >
         <FaCaretDown /> Move Down
       </Button>
+      {/* <div className="mt-2 justify-end">
+        <AIButton
+          onClick={handleAIRewrite}
+          isLoading={isAILoading}
+          disabled={!description || description.split(/\s+/).length < 20}
+        />
+      </div> */}
     </div>
   );
 };

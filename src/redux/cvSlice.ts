@@ -31,6 +31,7 @@ export interface CVState {
   };
   education: {
     school: string;
+    desc: string;
     degree: string;
     graduationYear: any;
   }[];

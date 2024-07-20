@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
+import CVPreview from "../CVPreview";
 
 interface PDFPreviewModalProps {
   show: boolean;
@@ -17,13 +18,16 @@ const PDFPreviewModal: React.FC<PDFPreviewModalProps> = ({
   if (!show) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-40">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center top-10 z-40">
       <div className="bg-white p-4 rounded-lg w-full h-full max-w-5xl max-h-[90vh] flex flex-col">
         <h2 className="text-2xl mb-4">PDF Preview</h2>
-        <div className="flex-grow w-full h-full flex items-center justify-center bg-gray-100 border border-gray-300 rounded">
-          <p className="text-lg text-gray-600">
+        <div className="flex-grow w-full h-full flex items-center justify-center bg-gray-100 border border-gray-300 rounded overflow-auto">
+          {/* <p className="text-lg text-gray-600">
             PDF preview belum tersedia. Click tombol Download untuk mengunduh hasil.
-          </p>
+          </p> */}
+              <Suspense fallback={<div>Loading template...</div>}>
+                <CVPreview />
+              </Suspense>
         </div>
         <div className="mt-4 flex justify-between">
           <button

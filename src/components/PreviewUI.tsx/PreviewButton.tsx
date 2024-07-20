@@ -60,15 +60,7 @@ const PreviewControls: React.FC<PreviewControlsProps> = ({
         >
           {isGenerating ? "Generating..." : "Preview PDF"}
         </button>
-        {/* <button
-          className={`px-4 py-2 bg-gray-600 hover:bg-gray-500 text-white rounded ${
-            isGenerating ? "opacity-50 cursor-not-allowed" : ""
-          }`}
-          onClick={onDownloadPDF}
-          disabled={isGenerating}
-        >
-          {isGenerating ? "Generating..." : "Download PDF"}
-        </button> */}
+
       </div>
       {error && (
               <Alert variant="destructive" className="mt-4">

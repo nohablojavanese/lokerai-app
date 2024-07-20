@@ -31,7 +31,9 @@ const LinkedInProfileForm: React.FC = () => {
       return;
     }
     if (isBlockedUrl(url)) {
-      setError("This LinkedIn profile is not allowed. Please use another URL. You try to dox me or what!?");
+      setError(
+        "This LinkedIn profile is not allowed. Please use another URL. You try to dox me or what!?"
+      );
       return;
     }
 
@@ -59,7 +61,7 @@ const LinkedInProfileForm: React.FC = () => {
       // Update personal info
       dispatch(
         updatePersonalInfo({
-          name: data.first_name ,
+          name: data.first_name,
           last: data.last_name,
           email: data.email || "",
           phone: data.phone || "",
@@ -75,6 +77,7 @@ const LinkedInProfileForm: React.FC = () => {
         dispatch(
           addEducation({
             school: edu.school,
+            desc: edu.field_of_study,
             degree: edu.degree,
             graduationYear: edu.end_year,
           })
@@ -127,10 +130,18 @@ const LinkedInProfileForm: React.FC = () => {
         <Progress isIndeterminate color="primary" className="mt-2" />
       )}
       <div className="flex text-xs md:text-md justify-between mt-2 md:mt-4">
-        <Button className="text-xs md:text-base" type="submit" disabled={isLoading}>
+        <Button
+          className="text-xs md:text-base"
+          type="submit"
+          disabled={isLoading}
+        >
           {isLoading ? "Loading..." : "Import LinkedIn Profile"}
         </Button>
-        <Button className="text-xs md:text-base" onClick={handleClearState} color="secondary">
+        <Button
+          className="text-xs md:text-base"
+          onClick={handleClearState}
+          color="secondary"
+        >
           Clear All Data
         </Button>
       </div>

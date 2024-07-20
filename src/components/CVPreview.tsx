@@ -3,8 +3,8 @@ import { useSelector } from "react-redux";
 import { RootState } from "../redux/store";
 import { usePDF } from "react-to-pdf";
 import { CVState } from "@/types";
-import PreviewControls from "./PreviewUI.tsx/zoom";
-import PDFPreviewModal from "./PreviewUI.tsx/previewmodal";
+import PreviewControls from "./PreviewUI.tsx/PreviewButton";
+import PDFPreviewModal from "./PreviewUI.tsx/PreviewPDFModal";
 import CVSidebar from "./Preview/Sidebar/Sidebar";
 
 const ATSTemplate = lazy(() => import("./Preview/ATSTemplate"));
@@ -48,7 +48,6 @@ const CVPreview: React.FC = () => {
   const [showSidebar, setShowSidebar] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [zoom, setZoom] = useState(100);
-  const previewRef = useRef<HTMLDivElement>(null);
 
   const { toPDF, targetRef } = usePDF({
     filename: `${cv.personalInfo.name}_TawaKarir_CV.pdf`,
@@ -126,10 +125,10 @@ const CVPreview: React.FC = () => {
                 <SelectedTemplate cv={cv} />
               </Suspense>
             </div>
+            <p className="absolute text-xs text-gray-200 right-1 top-1">
+              LokerAI.com
+            </p>
           </div>
-          <p className="absolute text-xs text-gray-200 right-2 bottom-0">
-            LokerAI.com
-          </p>
         </div>
 
         <div

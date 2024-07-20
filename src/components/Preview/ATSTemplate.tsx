@@ -12,7 +12,7 @@ const formatDescription = (description: string) => {
 
   if (lines[0].match(/^(-|\d+\.)/)) {
     return (
-      <ul className="list-disc list-outside text-left">
+      <ul className="list-disc list-outside text-left pl-4">
         {lines.map((item, index) => {
           const cleanItem = item.replace(/^(-|\d+\.)/, "").trim();
           return cleanItem && <li key={index}>{cleanItem}</li>;
@@ -36,20 +36,20 @@ const ATSTemplate: React.FC<ATSTemplateProps> = ({ cv, className = "", useRespon
 
   const textSizes = useResponsive
     ? {
-        name: "text-[4vw]",
-        summary: "text-[2vw]",
-        sectionTitle: "text-[3vw]",
-        itemTitle: "text-[2.5vw]",
-        itemSubtitle: "text-[2vw]",
-        normal: "text-[1.5vw]",
+        // name: "text-[4vw]",
+        // summary: "text-[2vw]",
+        // sectionTitle: "text-[3vw]",
+        // itemTitle: "text-[2.5vw]",
+        // itemSubtitle: "text-[2vw]",
+        // normal: "text-[1.5vw]",
       }
     : {
-        name: "text-md",
-        summary: "text-sm",
-        sectionTitle: "text-sm",
-        itemTitle: "text-md",
-        itemSubtitle: "text-md",
-        normal: "text-sm",
+        name: "text-sm md:text-base",
+        summary: "text-xs md:text-sm",
+        sectionTitle: "text-xs md:text-sm",
+        itemTitle: "text-sm md:text-base",
+        itemSubtitle: "text-sm md:text-base",
+        normal: "text-xs md:text-sm",
       };
 
   return (

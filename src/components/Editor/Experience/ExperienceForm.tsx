@@ -69,16 +69,16 @@ const ExperienceForm: React.FC = () => {
     reset();
   };
 
-  const handleEdit = (index: number) => {
-    const experienceItem = experience[index];
-    setValue("company", experienceItem.company);
-    setValue("position", experienceItem.position);
-    setValue("startDate", experienceItem.startDate);
-    setValue("endDate", experienceItem.endDate);
-    setValue("description", experienceItem.description);
-    setValue("currentlyWorkHere", experienceItem.endDate === "Present");
-    setEditIndex(index);
-  };
+  // const handleEdit = (index: number) => {
+  //   const experienceItem = experience[index];
+  //   setValue("company", experienceItem.company);
+  //   setValue("position", experienceItem.position);
+  //   setValue("startDate", experienceItem.startDate);
+  //   setValue("endDate", experienceItem.endDate);
+  //   setValue("description", experienceItem.description);
+  //   setValue("currentlyWorkHere", experienceItem.endDate === "Present");
+  //   setEditIndex(index);
+  // };
 
   const cancelEdit = () => {
     setEditIndex(null);
