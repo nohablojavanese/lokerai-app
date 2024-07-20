@@ -38,23 +38,28 @@ const EducationForm: React.FC = () => {
     resolver: yupResolver(educationSchema),
   });
 
-  const onSubmit = (data: CVState["education"][0]) => {
+  const onSubmit = (data: Omit<CVState["education"][0], "desc"> & { desc?: string }) => {
+    const educationData: CVState["education"][0] = {
+      ...data,
+      desc: data.desc || ""  // Provide a default empty string if desc is undefined
+    };
+  
     if (editIndex !== null) {
-      dispatch(updateEducation({ index: editIndex, education: data }));
+      dispatch(updateEducation({ index: editIndex, education: educationData }));
       setEditIndex(null);
     } else {
-      dispatch(addEducation(data));
+      dispatch(addEducation(educationData));
     }
     reset();
   };
 
-  const handleEdit = (index: number) => {
-    const educationItem = education[index];
-    setValue("school", educationItem.school);
-    setValue("degree", educationItem.degree);
-    setValue("graduationYear", educationItem.graduationYear);
-    setEditIndex(index);
-  };
+  // const handleEdit = (index: number) => {
+  //   const educationItem = education[index];
+  //   setValue("school", educationItem.school);
+  //   setValue("degree", educationItem.degree);
+  //   setValue("graduationYear", educationItem.graduationYear);
+  //   setEditIndex(index);
+  // };
 
   const cancelEdit = () => {
     setEditIndex(null);

@@ -43,8 +43,13 @@ const EducationItem: React.FC<EducationItemProps> = ({
     defaultValues: edu,
   });
 
-  const onSubmit = (data: CVState["education"][0]) => {
-    onEdit(data);
+
+  const onSubmit = (data: Omit<CVState["education"][0], "desc"> & { desc?: string }) => {
+    const updatedEdu: CVState["education"][0] = {
+      ...data,
+      desc: data.desc || ""  
+    };
+    onEdit(updatedEdu);
     setIsEditing(false);
   };
 

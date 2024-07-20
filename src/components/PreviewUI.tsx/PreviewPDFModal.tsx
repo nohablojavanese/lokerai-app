@@ -6,12 +6,14 @@ interface PDFPreviewModalProps {
   show: boolean;
   onClose: () => void;
   onDownloadPDF: () => void;
+  isGenerating: boolean;
 }
 
 const PDFPreviewModal: React.FC<PDFPreviewModalProps> = ({
   show,
   onClose,
   onDownloadPDF,
+  isGenerating,
 }) => {
   const [error, setError] = useState<string | null>(null);
 
@@ -22,12 +24,9 @@ const PDFPreviewModal: React.FC<PDFPreviewModalProps> = ({
       <div className="bg-white p-4 rounded-lg w-full h-full max-w-5xl max-h-[90vh] flex flex-col">
         <h2 className="text-2xl mb-4">PDF Preview</h2>
         <div className="flex-grow w-full h-full flex items-center justify-center bg-gray-100 border border-gray-300 rounded overflow-auto">
-          {/* <p className="text-lg text-gray-600">
-            PDF preview belum tersedia. Click tombol Download untuk mengunduh hasil.
-          </p> */}
-              <Suspense fallback={<div>Loading template...</div>}>
-                <CVPreview />
-              </Suspense>
+          <Suspense fallback={<div>Loading template...</div>}>
+            <CVPreview />
+          </Suspense>
         </div>
         <div className="mt-4 flex justify-between">
           <button
@@ -39,6 +38,7 @@ const PDFPreviewModal: React.FC<PDFPreviewModalProps> = ({
           <button
             className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded"
             onClick={onDownloadPDF}
+            disabled={isGenerating}
           >
             Download PDF
           </button>

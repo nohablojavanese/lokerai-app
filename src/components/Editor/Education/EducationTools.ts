@@ -9,6 +9,7 @@ export const educationSchema = yup.object().shape({
     .required("Graduation year is required")
     .min(1945, "Graduation year must be 1945 or later")
     .max(2040, "Graduation year must be 2040 or earlier"),
+  desc: yup.string().optional(),
 });
 
 export const formatEducation = (education: any) => {
@@ -16,6 +17,7 @@ export const formatEducation = (education: any) => {
     school: education.school,
     degree: education.degree,
     graduationYear: education.graduationYear,
+    desc: education.desc,
   };
 };
 
