@@ -149,6 +149,7 @@ const CVPreview: React.FC = () => {
           show={showPreview}
           onClose={() => setShowPreview(false)}
           onDownloadPDF={handleDownloadPDF}
+          isGenerating={false}
         />
       </div>
     </div>
