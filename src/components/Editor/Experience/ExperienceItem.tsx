@@ -1,37 +1,27 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import {
-  addExperience,
-  removeExperience,
   updateExperience,
-  reorderExperience,
-  CVState,
+  Experience,
 } from "@/redux/cvSlice";
-import { RootState } from "@/redux/store";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { Input, Textarea } from "@nextui-org/input";
 import { Button } from "@nextui-org/button";
 import { Checkbox } from "@nextui-org/checkbox";
-import { motion, AnimatePresence } from "framer-motion";
-import { experienceSchema } from "./ExperienceTools";
+import { experienceSchema, ExperienceFormData, formatExperience } from "./ExperienceTools";
 import { useDisclosure } from "@nextui-org/modal";
 import AIButton from "@/components/ui/aisparkle";
 import { FaCaretDown, FaCaretUp } from "react-icons/fa";
-import { JobDescAI, rewriteSummary } from "./action";
+import { JobDescAI } from "./action";
 import { readStreamableValue } from "ai/rsc";
+
 interface ExperienceItemProps {
-  exp: CVState["experience"][0];
+  exp: Experience;
   index: number;
   isFirst: boolean;
   isLast: boolean;
-  onEdit: (updatedExp: CVState["experience"][0]) => void;
+  onEdit: (updatedExp: Experience) => void;
   onRemove: () => void;
   onReorder: (direction: "up" | "down") => void;
 }
@@ -48,17 +38,16 @@ const ExperienceItem: React.FC<ExperienceItemProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const dispatch = useDispatch();
-  const experience = useSelector((state: RootState) => state.cv.experience);
-  const [editIndex, setEditIndex] = useState<number | null>(null);
   const [isAILoading, setIsAILoading] = useState(false);
   const { isOpen, onOpen } = useDisclosure();
+
   const {
     register,
     handleSubmit,
     formState: { errors },
     setValue,
     watch,
-  } = useForm({
+  } = useForm<ExperienceFormData>({
     resolver: yupResolver(experienceSchema),
     defaultValues: {
       ...exp,
@@ -70,16 +59,12 @@ const ExperienceItem: React.FC<ExperienceItemProps> = ({
   const [error, setError] = useState<string | null>(null);
   const description = watch("description");
 
-  const onSubmit = (
-    data: CVState["experience"][0] & { currentlyWorkHere: boolean }
-  ) => {
-    const { currentlyWorkHere, ...experienceData } = data;
-    if (currentlyWorkHere) {
-      experienceData.endDate = "Present";
-    }
-    dispatch(updateExperience({ index, experience: experienceData }));
+  const onSubmit = (data: ExperienceFormData) => {
+    const formattedExperience = formatExperience(data);
+    dispatch(updateExperience({ index, experience: formattedExperience }));
     setIsEditing(false);
   };
+
   const renderDescription = (description: string) => {
     const words = description.split(" ");
     if (isExpanded || words.length <= 20) {
@@ -87,11 +72,13 @@ const ExperienceItem: React.FC<ExperienceItemProps> = ({
     }
     return words.slice(0, 20).join(" ") + "...";
   };
+
   const formatDate = (dateString: string) => {
     if (dateString === "Present") return "Present";
     const date = new Date(dateString);
     return date.toLocaleString("default", { month: "short", year: "2-digit" });
   };
+
   const handleAIRewrite = async () => {
     setIsAILoading(true);
     setError(null);
@@ -124,6 +111,7 @@ const ExperienceItem: React.FC<ExperienceItemProps> = ({
       setIsAILoading(false);
     }
   };
+
   return (
     <div className="mb-4 p-4 border rounded bg-white">
       {isEditing ? (
@@ -196,11 +184,10 @@ const ExperienceItem: React.FC<ExperienceItemProps> = ({
         </form>
       ) : (
         <>
-          <div className="flex items-start justify-end mb-2  text-right">
+          <div className="flex items-start justify-end mb-2 text-right">
             <div>
-              <p className="text-gray-500 text-sm ">
+              <p className="text-gray-500 text-sm">
                 <strong>Start Date: </strong>{formatDate(exp.startDate)}
-
               </p>
               <p className="text-gray-500 text-sm">
                 <strong>End Date: </strong>{formatDate(exp.endDate)}
@@ -223,7 +210,7 @@ const ExperienceItem: React.FC<ExperienceItemProps> = ({
                   onClick={() => setIsExpanded(!isExpanded)}
                   className="text-blue-500 cursor-pointer ml-2"
                 >
-                  {isExpanded ? "Tutup" : "Baca Lebih"}
+                  {isExpanded ? "Close" : "Read More"}
                 </span>
               )}
             </p>
@@ -256,13 +243,6 @@ const ExperienceItem: React.FC<ExperienceItemProps> = ({
       >
         <FaCaretDown /> Move Down
       </Button>
-      {/* <div className="mt-2 justify-end">
-        <AIButton
-          onClick={handleAIRewrite}
-          isLoading={isAILoading}
-          disabled={!description || description.split(/\s+/).length < 20}
-        />
-      </div> */}
     </div>
   );
 };

@@ -1,15 +1,19 @@
 import * as yup from "yup";
-import { streamText } from "ai";
-import { openai } from "@ai-sdk/openai";
 
 export const experienceSchema = yup.object().shape({
   company: yup.string().required("Company is required"),
   position: yup.string().required("Position is required"),
   startDate: yup.string().required("Start date is required"),
-  endDate: yup.string().required("End date is required"),
+  endDate: yup.string().when('currentlyWorkHere', {
+    is: true,
+    then: () => yup.string().notRequired(),
+    otherwise: () => yup.string().required("End date is required"),
+  }),
   description: yup.string().required("Description is required"),
   currentlyWorkHere: yup.boolean().default(false),
 });
+
+export type ExperienceFormData = yup.InferType<typeof experienceSchema>;
 
 export const formatExperience = (experience: any) => {
   return {

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, SubmitHandler } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -7,6 +7,7 @@ import {
   removeExperience,
   updateExperience,
   reorderExperience,
+  Experience,
   CVState,
 } from "@/redux/cvSlice";
 import { RootState } from "@/redux/store";
@@ -20,7 +21,7 @@ import { Input, Textarea } from "@nextui-org/input";
 import { Button } from "@nextui-org/button";
 import { Checkbox } from "@nextui-org/checkbox";
 import { motion, AnimatePresence } from "framer-motion";
-import { experienceSchema } from "./ExperienceTools";
+import { experienceSchema, ExperienceFormData } from "./ExperienceTools";
 import ExperienceItem from "./ExperienceItem";
 import AIButton from "@/components/ui/aisparkle";
 import { rewriteSummary } from "./action";
@@ -41,44 +42,32 @@ const ExperienceForm: React.FC = () => {
     reset,
     setValue,
     watch,
-  } = useForm({
+  } = useForm<ExperienceFormData>({
     resolver: yupResolver(experienceSchema),
     defaultValues: {
       currentlyWorkHere: false,
     },
   });
 
-  const currentlyWorkHere = watch("currentlyWorkHere");
   const description = watch("description");
+  const currentlyWorkHere = watch("currentlyWorkHere");
 
-  const onSubmit = (
-    data: CVState["experience"][0] & { currentlyWorkHere: boolean }
-  ) => {
+  const onSubmit: SubmitHandler<ExperienceFormData> = (data) => {
     const { currentlyWorkHere, ...experienceData } = data;
-    if (currentlyWorkHere) {
-      experienceData.endDate = "Present";
-    }
+    const formattedExperience: Experience = {
+      ...experienceData,
+      endDate: currentlyWorkHere ? "Present" : experienceData.endDate || "",
+    };
     if (editIndex !== null) {
       dispatch(
-        updateExperience({ index: editIndex, experience: experienceData })
+        updateExperience({ index: editIndex, experience: formattedExperience })
       );
       setEditIndex(null);
     } else {
-      dispatch(addExperience(experienceData));
+      dispatch(addExperience(formattedExperience));
     }
     reset();
   };
-
-  // const handleEdit = (index: number) => {
-  //   const experienceItem = experience[index];
-  //   setValue("company", experienceItem.company);
-  //   setValue("position", experienceItem.position);
-  //   setValue("startDate", experienceItem.startDate);
-  //   setValue("endDate", experienceItem.endDate);
-  //   setValue("description", experienceItem.description);
-  //   setValue("currentlyWorkHere", experienceItem.endDate === "Present");
-  //   setEditIndex(index);
-  // };
 
   const cancelEdit = () => {
     setEditIndex(null);
@@ -162,11 +151,11 @@ const ExperienceForm: React.FC = () => {
                 {...register("endDate")}
                 label="End Date"
                 type="date"
-                // isRequired={!currentlyWorkHere}
+                isRequired={!currentlyWorkHere}
                 labelPlacement="outside"
                 isInvalid={!!errors.endDate}
                 errorMessage={errors.endDate?.message}
-                // isDisabled={currentlyWorkHere}
+                isDisabled={currentlyWorkHere}
               />
             </AccordionContent>
             <AccordionContent className="mb-4">

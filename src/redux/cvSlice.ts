@@ -13,7 +13,13 @@ export interface LinkedInProfile {
   }>;
   // Add other relevant fields as needed
 }
-
+export interface Experience {
+  company: string;
+  position: string;
+  startDate: string;
+  endDate: string | "Present";
+  description: string;
+}
 
 export interface CVState {
   fontSettings: {
@@ -33,14 +39,14 @@ export interface CVState {
     school: string;
     desc: string;
     degree: string;
-    graduationYear: string;
+    graduationYear: number;
   }[];
   experience: {
-    company: string;
-    position: string;
-    startDate: string;
-    endDate: string;
-    description: string;
+  company: string;
+  position: string;
+  startDate: string;
+  endDate: string | "Present";
+  description: string;
     // currentlyWorkHere: boolean;
   }[];
   skills: string[];
@@ -55,11 +61,11 @@ export const initialState: CVState = {
     fontSize: 12,
   },
   personalInfo: {
-    name: "Nama Depan",
-    last: "Belakang",
-    alamat: "Jln. Jalan JK 9AK",
-    email: "email@contoh.com",
-    phone: "0821xxxxxxxx",
+    name: "",
+    last: "",
+    alamat: "",
+    email: "",
+    phone: "",
     ringkasan: "",
   },
   education: [],
@@ -94,15 +100,12 @@ const cvSlice = createSlice({
     removeEducation: (state, action: PayloadAction<number>) => {
       state.education.splice(action.payload, 1);
     },
-    addExperience: (state, action: PayloadAction<CVState["experience"][0]>) => {
+    addExperience: (state, action: PayloadAction<Experience>) => {
       state.experience.push(action.payload);
     },
     updateExperience: (
       state,
-      action: PayloadAction<{
-        index: number;
-        experience: CVState["experience"][0];
-      }>
+      action: PayloadAction<{ index: number; experience: Experience }>
     ) => {
       const { index, experience } = action.payload;
       state.experience[index] = experience;

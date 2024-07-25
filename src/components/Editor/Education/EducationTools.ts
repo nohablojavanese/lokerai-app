@@ -4,7 +4,7 @@ export const educationSchema = yup.object().shape({
   school: yup.string().required("School is required"),
   degree: yup.string().required("Degree is required"),
   graduationYear: yup
-    .string()
+    .number()
     .typeError("Graduation year must be a number")
     .required("Graduation year is required")
     .min(1945, "Graduation year must be 1945 or later")
