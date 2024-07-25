@@ -41,7 +41,7 @@ const EducationForm: React.FC = () => {
   const onSubmit = (data: Omit<CVState["education"][0], "desc"> & { desc?: string }) => {
     const educationData: CVState["education"][0] = {
       ...data,
-      desc: data.desc || ""  // Provide a default empty string if desc is undefined
+      desc: data.desc || ""  
     };
   
     if (editIndex !== null) {

@@ -24,7 +24,7 @@ const formatDescription = (description: string) => {
   }
 };
 
-const formatDate = (dateString: string) => {
+const formatDate = (dateString: any) => {
   if (dateString === "Present") return "Present";
   const date = new Date(dateString);
   return date.toLocaleString("default", { month: "short", year: "numeric" });

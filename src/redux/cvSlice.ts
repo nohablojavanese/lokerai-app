@@ -41,14 +41,7 @@ export interface CVState {
     degree: string;
     graduationYear: number;
   }[];
-  experience: {
-  company: string;
-  position: string;
-  startDate: string;
-  endDate: string | "Present";
-  description: string;
-    // currentlyWorkHere: boolean;
-  }[];
+  experience:Experience[];
   skills: string[];
   linkedInProfile: LinkedInProfile | null;
 
